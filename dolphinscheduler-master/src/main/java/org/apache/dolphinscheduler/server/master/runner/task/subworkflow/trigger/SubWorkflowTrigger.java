@@ -22,14 +22,15 @@ import org.apache.dolphinscheduler.common.enums.Flag;
 import org.apache.dolphinscheduler.common.enums.WarningType;
 import org.apache.dolphinscheduler.common.enums.WorkflowExecutionStatus;
 import org.apache.dolphinscheduler.common.utils.DateUtils;
+import org.apache.dolphinscheduler.common.utils.JSONUtils;
 import org.apache.dolphinscheduler.dao.entity.Command;
 import org.apache.dolphinscheduler.dao.entity.WorkflowDefinition;
 import org.apache.dolphinscheduler.dao.entity.WorkflowInstance;
 import org.apache.dolphinscheduler.dao.utils.EnvironmentUtils;
 import org.apache.dolphinscheduler.dao.utils.WorkerGroupUtils;
+import org.apache.dolphinscheduler.extract.master.command.RunWorkflowCommandParam;
 import org.apache.dolphinscheduler.server.master.engine.workflow.trigger.AbstractWorkflowTrigger;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.Date;
@@ -87,12 +88,24 @@ public class SubWorkflowTrigger
     @Override
     protected Command constructTriggerCommand(final SubWorkflowTriggerRequest subWorkflowTriggerRequest,
                                               final WorkflowInstance workflowInstance) {
-        throw new NotImplementedException();
+        final RunWorkflowCommandParam runWorkflowCommandParam = RunWorkflowCommandParam.builder()
+                .commandParams(subWorkflowTriggerRequest.getStartParamList())
+                .startNodes(subWorkflowTriggerRequest.getStartNodes())
+                .timeZone(DateUtils.getTimezone())
+                .build();
+        return Command.builder()
+                .commandType(CommandType.START_PROCESS)
+                .workflowDefinitionCode(subWorkflowTriggerRequest.getWorkflowDefinitionCode())
+                .workflowDefinitionVersion(subWorkflowTriggerRequest.getWorkflowDefinitionVersion())
+                .workflowInstanceId(workflowInstance.getId())
+                .workflowInstancePriority(workflowInstance.getWorkflowInstancePriority())
+                .commandParam(JSONUtils.toJsonString(runWorkflowCommandParam))
+                .build();
     }
 
     @Override
     protected SubWorkflowTriggerResponse onTriggerSuccess(WorkflowInstance workflowInstance) {
-        throw new NotImplementedException();
+        return SubWorkflowTriggerResponse.success(workflowInstance.getId());
     }
 
 }

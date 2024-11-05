@@ -17,8 +17,6 @@
 
 package org.apache.dolphinscheduler.server.master.runner.task.subworkflow.trigger;
 
-import org.apache.commons.lang3.NotImplementedException;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -37,11 +35,17 @@ public class SubWorkflowTriggerResponse {
     private Integer workflowInstanceId;
 
     public static SubWorkflowTriggerResponse fail(String message) {
-        throw new NotImplementedException();
+        return SubWorkflowTriggerResponse.builder()
+                .success(false)
+                .message(message)
+                .build();
     }
 
     public static SubWorkflowTriggerResponse success(Integer workflowInstanceId) {
-        throw new NotImplementedException();
+        return SubWorkflowTriggerResponse.builder()
+                .success(true)
+                .workflowInstanceId(workflowInstanceId)
+                .build();
     }
 
 }
