@@ -32,7 +32,6 @@ import org.apache.dolphinscheduler.extract.master.transportor.workflow.WorkflowI
 import org.apache.dolphinscheduler.extract.master.transportor.workflow.WorkflowInstanceRecoverSuspendTasksRequest;
 import org.apache.dolphinscheduler.extract.master.transportor.workflow.WorkflowInstanceStopRequest;
 import org.apache.dolphinscheduler.extract.master.transportor.workflow.WorkflowInstanceStopResponse;
-import org.apache.dolphinscheduler.extract.master.transportor.workflow.WorkflowManualTriggerRequest;
 import org.apache.dolphinscheduler.plugin.task.api.TaskExecutionContext;
 import org.apache.dolphinscheduler.plugin.task.api.parameters.SubWorkflowParameters;
 import org.apache.dolphinscheduler.server.master.engine.workflow.runnable.IWorkflowExecutionRunnable;
@@ -40,6 +39,7 @@ import org.apache.dolphinscheduler.server.master.exception.MasterTaskExecuteExce
 import org.apache.dolphinscheduler.server.master.runner.execute.AsyncTaskExecuteFunction;
 import org.apache.dolphinscheduler.server.master.runner.message.LogicTaskInstanceExecutionEventSenderManager;
 import org.apache.dolphinscheduler.server.master.runner.task.BaseAsyncLogicTask;
+import org.apache.dolphinscheduler.server.master.runner.task.subworkflow.trigger.SubWorkflowTriggerRequest;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -183,7 +183,8 @@ public class SubWorkflowLogicTask extends BaseAsyncLogicTask<SubWorkflowParamete
         final ICommandParam commandParam =
                 JSONUtils.parseObject(workflowInstance.getCommandParam(), ICommandParam.class);
 
-        final WorkflowManualTriggerRequest workflowManualTriggerRequest = WorkflowManualTriggerRequest.builder()
+        final SubWorkflowTriggerRequest workflowManualTriggerRequest = SubWorkflowTriggerRequest.builder()
+                .scheduleTIme(workflowInstance.getScheduleTime())
                 .userId(taskExecutionContext.getExecutorId())
                 .workflowDefinitionCode(subWorkflowDefinition.getCode())
                 .workflowDefinitionVersion(subWorkflowDefinition.getVersion())
