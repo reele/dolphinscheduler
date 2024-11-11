@@ -17,6 +17,8 @@
 
 package org.apache.dolphinscheduler.server.master.engine.workflow.listener;
 
+import org.apache.dolphinscheduler.common.constants.Constants;
+import org.apache.dolphinscheduler.common.constants.DateConstants;
 import org.apache.dolphinscheduler.common.enums.CommandType;
 import org.apache.dolphinscheduler.common.enums.Flag;
 import org.apache.dolphinscheduler.common.utils.DateUtils;
@@ -32,9 +34,12 @@ import org.apache.dolphinscheduler.server.master.engine.workflow.lifecycle.Workf
 import org.apache.dolphinscheduler.server.master.engine.workflow.runnable.IWorkflowExecutionRunnable;
 import org.apache.dolphinscheduler.server.master.engine.workflow.trigger.WorkflowBackfillTrigger;
 
+import org.apache.dolphinscheduler.plugin.task.api.model.Property;
+
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.List;
+import java.util.Optional;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -77,7 +82,20 @@ public class WorkflowSuccessLifecycleListener implements IWorkflowLifecycleListe
                                              final WorkflowInstance workflowInstance) {
         // Generate next backfill command
         final List<String> backfillTimeList = commandParam.getBackfillTimeList();
-        backfillTimeList.remove(DateUtils.dateToString(workflowInstance.getScheduleTime()));
+
+        final String scheduleTime =
+                Optional.ofNullable(JSONUtils.parseObject(workflowInstance.getCommandParam(), ICommandParam.class))
+                        .map(ICommandParam::getCommandParams).flatMap(list -> list.stream()
+                                .filter(property -> property.getProp().equals(DateConstants.PARAMETER_SCHEDULE_TIME))
+                                .findFirst()
+                                .map(Property::getValue)
+                        )
+                        .orElse(null);
+        if (scheduleTime == null) {
+            throw new AssertionError(String.format("%s should not be null!", DateConstants.PARAMETER_SCHEDULE_TIME));
+        }
+
+        backfillTimeList.remove(scheduleTime);
         if (CollectionUtils.isEmpty(backfillTimeList)) {
             return;
         }

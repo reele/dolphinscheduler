@@ -51,12 +51,7 @@ import org.apache.dolphinscheduler.plugin.task.api.utils.PropertyUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -287,7 +282,16 @@ public class CuringParamsServiceImpl implements CuringParamsService {
                                                     String projectName,
                                                     String workflowDefinitionName) {
         CommandType commandType = workflowInstance.getCmdTypeIfComplement();
-        Date scheduleTime = workflowInstance.getScheduleTime();
+
+        final Date scheduleTime =
+                Optional.ofNullable(JSONUtils.parseObject(workflowInstance.getCommandParam(), ICommandParam.class))
+                        .map(ICommandParam::getCommandParams).flatMap(list -> list.stream()
+                                .filter(property -> property.getProp().equals(DateConstants.PARAMETER_SCHEDULE_TIME))
+                                .findFirst()
+                                .map(Property::getValue)
+                                .map(DateUtils::stringToDate)
+                        )
+                        .orElse(null);
 
         Map<String, String> params = BusinessTimeUtils.getBusinessTime(commandType, scheduleTime, timeZone);
 
@@ -323,9 +327,19 @@ public class CuringParamsServiceImpl implements CuringParamsService {
     public Map<String, Property> preBuildBusinessParams(WorkflowInstance workflowInstance) {
         Map<String, Property> paramsMap = new HashMap<>();
         // replace variable TIME with $[YYYYmmddd...] in shell file when history run job and batch complement job
-        if (workflowInstance.getScheduleTime() != null) {
-            Date date = workflowInstance.getScheduleTime();
-            String dateTime = DateUtils.format(date, DateConstants.PARAMETER_FORMAT_TIME, null);
+
+        final Date scheduleTime =
+                Optional.ofNullable(JSONUtils.parseObject(workflowInstance.getCommandParam(), ICommandParam.class))
+                        .map(ICommandParam::getCommandParams).flatMap(list -> list.stream()
+                                .filter(property -> property.getProp().equals(DateConstants.PARAMETER_SCHEDULE_TIME))
+                                .findFirst()
+                                .map(Property::getValue)
+                                .map(DateUtils::stringToDate)
+                        )
+                        .orElse(null);
+
+        if (scheduleTime != null) {
+            String dateTime = DateUtils.format(scheduleTime, DateConstants.PARAMETER_FORMAT_TIME, null);
             Property p = new Property();
             p.setValue(dateTime);
             p.setProp(DateConstants.PARAMETER_DATETIME);

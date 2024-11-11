@@ -19,12 +19,16 @@ package org.apache.dolphinscheduler.server.master.engine.task.runnable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.apache.dolphinscheduler.common.constants.Constants;
+import org.apache.dolphinscheduler.common.constants.DateConstants;
 import org.apache.dolphinscheduler.common.enums.TimeoutFlag;
 import org.apache.dolphinscheduler.common.utils.DateUtils;
+import org.apache.dolphinscheduler.common.utils.JSONUtils;
 import org.apache.dolphinscheduler.dao.entity.TaskDefinition;
 import org.apache.dolphinscheduler.dao.entity.TaskInstance;
 import org.apache.dolphinscheduler.dao.entity.WorkflowDefinition;
 import org.apache.dolphinscheduler.dao.entity.WorkflowInstance;
+import org.apache.dolphinscheduler.extract.master.command.ICommandParam;
 import org.apache.dolphinscheduler.plugin.task.api.K8sTaskExecutionContext;
 import org.apache.dolphinscheduler.plugin.task.api.TaskExecutionContext;
 import org.apache.dolphinscheduler.plugin.task.api.enums.TaskExecutionStatus;
@@ -32,7 +36,10 @@ import org.apache.dolphinscheduler.plugin.task.api.enums.TaskTimeoutStrategy;
 import org.apache.dolphinscheduler.plugin.task.api.model.Property;
 import org.apache.dolphinscheduler.plugin.task.api.parameters.resource.ResourceParametersHelper;
 
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import lombok.extern.slf4j.Slf4j;
@@ -98,8 +105,19 @@ public class TaskExecutionContextBuilder {
      * @return TaskExecutionContextBuilder
      */
     public TaskExecutionContextBuilder buildProcessInstanceRelatedInfo(WorkflowInstance workflowInstance) {
+
+        final Date scheduleTime =
+                Optional.ofNullable(JSONUtils.parseObject(workflowInstance.getCommandParam(), ICommandParam.class))
+                        .map(ICommandParam::getCommandParams).flatMap(list -> list.stream()
+                                .filter(property -> property.getProp().equals(DateConstants.PARAMETER_SCHEDULE_TIME))
+                                .findFirst()
+                                .map(Property::getValue)
+                                .map(DateUtils::stringToDate)
+                        )
+                        .orElse(null);
+
         taskExecutionContext.setWorkflowInstanceId(workflowInstance.getId());
-        taskExecutionContext.setScheduleTime(DateUtils.dateToTimeStamp(workflowInstance.getScheduleTime()));
+        taskExecutionContext.setScheduleTime(DateUtils.dateToTimeStamp(scheduleTime));
         taskExecutionContext.setGlobalParams(workflowInstance.getGlobalParams());
         taskExecutionContext.setExecutorId(workflowInstance.getExecutorId());
         taskExecutionContext.setCmdTypeIfComplement(workflowInstance.getCmdTypeIfComplement().getCode());

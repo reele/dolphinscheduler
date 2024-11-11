@@ -65,6 +65,10 @@ public class DateConstants {
     public static final String PARAMETER_BUSINESS_DATE = "system.biz.date";
 
     /**
+     * system date(yyyymmdd hh:MM:ss) schedule time
+     */
+    public static final String PARAMETER_SCHEDULE_TIME = "system.schedule.time";
+    /**
      * month_begin
      */
     public static final String MONTH_BEGIN = "month_begin";

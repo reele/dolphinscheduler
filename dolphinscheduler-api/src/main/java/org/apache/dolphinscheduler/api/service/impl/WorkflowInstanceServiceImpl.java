@@ -45,6 +45,7 @@ import org.apache.dolphinscheduler.api.utils.PageInfo;
 import org.apache.dolphinscheduler.api.utils.Result;
 import org.apache.dolphinscheduler.common.constants.CommandKeyConstants;
 import org.apache.dolphinscheduler.common.constants.Constants;
+import org.apache.dolphinscheduler.common.constants.DateConstants;
 import org.apache.dolphinscheduler.common.enums.Flag;
 import org.apache.dolphinscheduler.common.enums.WorkflowExecutionStatus;
 import org.apache.dolphinscheduler.common.graph.DAG;
@@ -74,6 +75,7 @@ import org.apache.dolphinscheduler.dao.repository.TaskInstanceDao;
 import org.apache.dolphinscheduler.dao.repository.WorkflowInstanceDao;
 import org.apache.dolphinscheduler.dao.repository.WorkflowInstanceMapDao;
 import org.apache.dolphinscheduler.dao.utils.WorkflowUtils;
+import org.apache.dolphinscheduler.extract.master.command.ICommandParam;
 import org.apache.dolphinscheduler.plugin.task.api.model.Property;
 import org.apache.dolphinscheduler.plugin.task.api.utils.ParameterUtils;
 import org.apache.dolphinscheduler.plugin.task.api.utils.TaskTypeUtils;
@@ -83,14 +85,7 @@ import org.apache.dolphinscheduler.service.process.ProcessService;
 
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -841,14 +836,22 @@ public class WorkflowInstanceServiceImpl extends BaseServiceImpl implements Work
             return result;
         }
 
-        Map<String, String> commandParam = JSONUtils.toMap(workflowInstance.getCommandParam());
+        ICommandParam commandParam = Optional.ofNullable(JSONUtils.parseObject(workflowInstance.getCommandParam(), ICommandParam.class)).orElse(null);
         String timezone = null;
+        Date scheduleTime = null;
         if (commandParam != null) {
-            timezone = commandParam.get(Constants.SCHEDULE_TIMEZONE);
+            timezone = commandParam.getTimeZone();
+            scheduleTime = Optional.ofNullable(commandParam.getCommandParams())
+                    .flatMap(list -> list.stream()
+                                    .filter(property -> property.getProp().equals(DateConstants.PARAMETER_SCHEDULE_TIME))
+                                    .findFirst()
+                                    .map(Property::getValue)
+                                    .map(DateUtils::stringToDate)
+                            ).orElse(null);
         }
         Map<String, String> timeParams = BusinessTimeUtils
                 .getBusinessTime(workflowInstance.getCmdTypeIfComplement(),
-                        workflowInstance.getScheduleTime(), timezone);
+                        scheduleTime, timezone);
         String userDefinedParams = workflowInstance.getGlobalParams();
         // global params
         List<Property> globalParams = new ArrayList<>();

@@ -20,6 +20,8 @@ package org.apache.dolphinscheduler.server.master.runner.task.dependent;
 import static org.apache.dolphinscheduler.common.constants.Constants.DEPENDENT_SPLIT;
 
 import org.apache.dolphinscheduler.common.constants.Constants;
+import org.apache.dolphinscheduler.common.constants.DateConstants;
+import org.apache.dolphinscheduler.common.utils.DateUtils;
 import org.apache.dolphinscheduler.common.utils.JSONUtils;
 import org.apache.dolphinscheduler.dao.entity.Project;
 import org.apache.dolphinscheduler.dao.entity.TaskDefinition;
@@ -31,6 +33,7 @@ import org.apache.dolphinscheduler.dao.repository.TaskDefinitionDao;
 import org.apache.dolphinscheduler.dao.repository.TaskInstanceDao;
 import org.apache.dolphinscheduler.dao.repository.WorkflowDefinitionDao;
 import org.apache.dolphinscheduler.dao.repository.WorkflowInstanceDao;
+import org.apache.dolphinscheduler.extract.master.command.ICommandParam;
 import org.apache.dolphinscheduler.plugin.task.api.TaskExecutionContext;
 import org.apache.dolphinscheduler.plugin.task.api.enums.DependResult;
 import org.apache.dolphinscheduler.plugin.task.api.model.DependentItem;
@@ -42,13 +45,7 @@ import org.apache.dolphinscheduler.server.master.runner.execute.AsyncTaskExecute
 import org.apache.dolphinscheduler.server.master.utils.DependentExecute;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -113,11 +110,13 @@ public class DependentAsyncTaskExecuteFunction implements AsyncTaskExecuteFuncti
     }
 
     private Date calculateDependentDate() {
-        if (workflowInstance.getScheduleTime() != null) {
-            return workflowInstance.getScheduleTime();
-        } else {
-            return new Date();
-        }
+        return Optional.ofNullable(JSONUtils.parseObject(workflowInstance.getCommandParam(), ICommandParam.class))
+                .map(ICommandParam::getCommandParams).flatMap(list -> list.stream()
+                        .filter(property -> property.getProp().equals(DateConstants.PARAMETER_SCHEDULE_TIME))
+                        .findFirst()
+                        .map(Property::getValue)
+                        .map(DateUtils::stringToDate)
+                ).orElseGet(Date::new);
     }
 
     private List<DependentExecute> initializeDependentTaskList() {

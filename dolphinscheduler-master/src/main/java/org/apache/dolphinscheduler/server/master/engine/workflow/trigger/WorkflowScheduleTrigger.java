@@ -17,6 +17,8 @@
 
 package org.apache.dolphinscheduler.server.master.engine.workflow.trigger;
 
+import org.apache.dolphinscheduler.common.constants.Constants;
+import org.apache.dolphinscheduler.common.constants.DateConstants;
 import org.apache.dolphinscheduler.common.enums.CommandType;
 import org.apache.dolphinscheduler.common.enums.Flag;
 import org.apache.dolphinscheduler.common.enums.WarningType;
@@ -34,8 +36,14 @@ import org.apache.dolphinscheduler.extract.master.transportor.workflow.WorkflowS
 
 import org.apache.commons.lang3.ObjectUtils;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
+import java.util.Properties;
 
+import org.apache.dolphinscheduler.plugin.task.api.enums.DataType;
+import org.apache.dolphinscheduler.plugin.task.api.enums.Direct;
+import org.apache.dolphinscheduler.plugin.task.api.model.Property;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -88,6 +96,7 @@ public class WorkflowScheduleTrigger
                                               final WorkflowInstance workflowInstance) {
         final ScheduleWorkflowCommandParam scheduleWorkflowCommandParam = ScheduleWorkflowCommandParam.builder()
                 .timeZone(scheduleTriggerRequest.getTimezoneId())
+                .commandParams(Collections.singletonList(new Property(DateConstants.PARAMETER_SCHEDULE_TIME, Direct.IN, DataType.VARCHAR, DateUtils.dateToString(scheduleTriggerRequest.getScheduleTIme()))))
                 .build();
         return Command.builder()
                 .commandType(CommandType.SCHEDULER)
