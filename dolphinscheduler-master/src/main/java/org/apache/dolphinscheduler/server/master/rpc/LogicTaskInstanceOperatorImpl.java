@@ -18,6 +18,14 @@
 package org.apache.dolphinscheduler.server.master.rpc;
 
 import org.apache.dolphinscheduler.extract.master.ILogicTaskInstanceOperator;
+import org.apache.dolphinscheduler.extract.master.transportor.LogicTaskDispatchRequest;
+import org.apache.dolphinscheduler.extract.master.transportor.LogicTaskDispatchResponse;
+import org.apache.dolphinscheduler.extract.master.transportor.LogicTaskKillRequest;
+import org.apache.dolphinscheduler.extract.master.transportor.LogicTaskKillResponse;
+import org.apache.dolphinscheduler.extract.master.transportor.LogicTaskPauseRequest;
+import org.apache.dolphinscheduler.extract.master.transportor.LogicTaskPauseResponse;
+import org.apache.dolphinscheduler.extract.master.transportor.LogicTaskTakeOverRequest;
+import org.apache.dolphinscheduler.extract.master.transportor.LogicTaskTakeOverResponse;
 
 import lombok.extern.slf4j.Slf4j;
 
