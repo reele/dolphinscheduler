@@ -33,7 +33,7 @@ public class LogicTaskInstanceOperationFunctionManager {
     private LogicITaskInstancePauseOperationFunction logicITaskInstancePauseOperationFunction;
 
     @Autowired
-    private LogicITaskInstanceTakeoverOperationFunction logicITaskInstanceTakeoverOperationFunction;
+    private LogicITaskInstanceTakeOverOperationFunction logicITaskInstanceTakeOverOperationFunction;
 
     public LogicITaskInstanceDispatchOperationFunction getLogicTaskInstanceDispatchOperationFunction() {
         return logicITaskInstanceDispatchOperationFunction;
@@ -47,8 +47,8 @@ public class LogicTaskInstanceOperationFunctionManager {
         return logicITaskInstancePauseOperationFunction;
     }
 
-    public LogicITaskInstanceTakeoverOperationFunction getLogicTaskInstanceTakeoverOperationFunction() {
-        return logicITaskInstanceTakeoverOperationFunction;
+    public LogicITaskInstanceTakeOverOperationFunction getLogicTaskInstanceTakeOverOperationFunction() {
+        return logicITaskInstanceTakeOverOperationFunction;
     }
 
 }

@@ -18,6 +18,7 @@
 package org.apache.dolphinscheduler.server.master.runner.execute;
 
 import org.apache.dolphinscheduler.server.master.runner.message.LogicTaskInstanceExecutionEventSenderManager;
+import org.apache.dolphinscheduler.server.master.runner.task.subworkflow.SubWorkflowLogicTask;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -51,13 +52,16 @@ public class MasterTaskExecutorThreadPoolManager {
         throw new IllegalArgumentException("Unknown type of MasterTaskExecutor: " + masterTaskExecutor);
     }
 
-
-    public boolean takeoverMasterTaskExecutor(final MasterTaskExecutor masterTaskExecutor) {
+    public boolean takeOverMasterTaskExecutor(final MasterTaskExecutor masterTaskExecutor) {
+        if (!(masterTaskExecutor.getLogicTask() instanceof SubWorkflowLogicTask)) {
+            throw new IllegalArgumentException(
+                    "Only SubWorkflowLogicTask can be take over: " + masterTaskExecutor.getLogicTask());
+        }
         MasterTaskExecutorHolder.putMasterTaskExecuteRunnable(masterTaskExecutor);
-//        if (masterTaskExecutor instanceof SyncMasterTaskExecutor) {
-//            return masterSyncTaskExecutorThreadPool
-//                    .submitMasterTaskExecutor((SyncMasterTaskExecutor) masterTaskExecutor);
-//        }
+        if (masterTaskExecutor instanceof SyncMasterTaskExecutor) {
+            return masterSyncTaskExecutorThreadPool
+                    .submitMasterTaskExecutor((SyncMasterTaskExecutor) masterTaskExecutor);
+        }
         if (masterTaskExecutor instanceof AsyncMasterTaskExecutor) {
             return masterAsyncTaskExecutorThreadPool
                     .submitMasterTaskExecutor((AsyncMasterTaskExecutor) masterTaskExecutor);

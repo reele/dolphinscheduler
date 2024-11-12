@@ -24,7 +24,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class LogicTaskTakeoverResponse {
+public class LogicTaskTakeOverResponse {
 
     private Integer taskInstanceId;
 
@@ -32,11 +32,11 @@ public class LogicTaskTakeoverResponse {
 
     private String message;
 
-    public static LogicTaskTakeoverResponse success(Integer taskInstanceId) {
-        return new LogicTaskTakeoverResponse(taskInstanceId, true, "takeover success");
+    public static LogicTaskTakeOverResponse success(Integer taskInstanceId) {
+        return new LogicTaskTakeOverResponse(taskInstanceId, true, "take over success");
     }
 
-    public static LogicTaskTakeoverResponse failed(Integer taskInstanceId, String message) {
-        return new LogicTaskTakeoverResponse(taskInstanceId, false, message);
+    public static LogicTaskTakeOverResponse failed(Integer taskInstanceId, String message) {
+        return new LogicTaskTakeOverResponse(taskInstanceId, false, message);
     }
 }

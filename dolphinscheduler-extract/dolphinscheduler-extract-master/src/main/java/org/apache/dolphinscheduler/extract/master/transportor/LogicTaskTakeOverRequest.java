@@ -17,17 +17,18 @@
 
 package org.apache.dolphinscheduler.extract.master.transportor;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.apache.dolphinscheduler.plugin.task.api.TaskExecutionContext;
 
 import java.io.Serializable;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class LogicTaskTakeoverRequest implements Serializable {
+public class LogicTaskTakeOverRequest implements Serializable {
 
     private static final long serialVersionUID = -1L;
 

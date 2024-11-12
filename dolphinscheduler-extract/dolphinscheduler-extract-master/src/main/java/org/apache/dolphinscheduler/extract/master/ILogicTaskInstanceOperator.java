@@ -19,7 +19,6 @@ package org.apache.dolphinscheduler.extract.master;
 
 import org.apache.dolphinscheduler.extract.base.RpcMethod;
 import org.apache.dolphinscheduler.extract.base.RpcService;
-import org.apache.dolphinscheduler.extract.master.transportor.*;
 
 @RpcService
 public interface ILogicTaskInstanceOperator {
@@ -34,6 +33,6 @@ public interface ILogicTaskInstanceOperator {
     LogicTaskPauseResponse pauseLogicTask(LogicTaskPauseRequest taskPauseRequest);
 
     @RpcMethod
-    LogicTaskTakeoverResponse takeoverLogicTask(LogicTaskTakeoverRequest taskTakeoverRequest);
+    LogicTaskTakeOverResponse takeOverLogicTask(LogicTaskTakeOverRequest taskTakeOverRequest);
 
 }

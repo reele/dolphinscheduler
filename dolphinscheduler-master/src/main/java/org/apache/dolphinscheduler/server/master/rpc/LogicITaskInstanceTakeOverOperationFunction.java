@@ -17,25 +17,26 @@
 
 package org.apache.dolphinscheduler.server.master.rpc;
 
-import lombok.extern.slf4j.Slf4j;
-import org.apache.dolphinscheduler.extract.master.transportor.LogicTaskTakeoverRequest;
-import org.apache.dolphinscheduler.extract.master.transportor.LogicTaskTakeoverResponse;
+import org.apache.dolphinscheduler.extract.master.transportor.LogicTaskTakeOverRequest;
+import org.apache.dolphinscheduler.extract.master.transportor.LogicTaskTakeOverResponse;
 import org.apache.dolphinscheduler.plugin.task.api.TaskExecutionContext;
-import org.apache.dolphinscheduler.plugin.task.api.enums.TaskExecutionStatus;
 import org.apache.dolphinscheduler.plugin.task.api.utils.LogUtils;
 import org.apache.dolphinscheduler.server.master.runner.execute.MasterTaskExecutionContextHolder;
 import org.apache.dolphinscheduler.server.master.runner.execute.MasterTaskExecutor;
 import org.apache.dolphinscheduler.server.master.runner.execute.MasterTaskExecutorFactoryBuilder;
 import org.apache.dolphinscheduler.server.master.runner.execute.MasterTaskExecutorThreadPoolManager;
 import org.apache.dolphinscheduler.server.master.runner.message.LogicTaskInstanceExecutionEventSenderManager;
+
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class LogicITaskInstanceTakeoverOperationFunction
+public class LogicITaskInstanceTakeOverOperationFunction
         implements
-            ITaskInstanceOperationFunction<LogicTaskTakeoverRequest, LogicTaskTakeoverResponse> {
+            ITaskInstanceOperationFunction<LogicTaskTakeOverRequest, LogicTaskTakeOverResponse> {
 
     @Autowired
     private MasterTaskExecutorFactoryBuilder masterTaskExecutorFactoryBuilder;
@@ -47,7 +48,7 @@ public class LogicITaskInstanceTakeoverOperationFunction
     private LogicTaskInstanceExecutionEventSenderManager logicTaskInstanceExecutionEventSenderManager;
 
     @Override
-    public LogicTaskTakeoverResponse operate(LogicTaskTakeoverRequest taskTakeoverRequest) {
+    public LogicTaskTakeOverResponse operate(LogicTaskTakeOverRequest taskTakeoverRequest) {
         log.info("Received dispatchLogicTask request: {}", taskTakeoverRequest);
         TaskExecutionContext taskExecutionContext = taskTakeoverRequest.getTaskExecutionContext();
         try {
@@ -66,12 +67,12 @@ public class LogicITaskInstanceTakeoverOperationFunction
                     .createMasterTaskExecutorFactory(taskExecutionContext.getTaskType())
                     .createMasterTaskExecutor(taskExecutionContext);
 
-            if (masterTaskExecutorThreadPool.takeoverMasterTaskExecutor(masterTaskExecutor)) {
-                log.info("Takeover LogicTask: {} to MasterTaskExecutorThreadPool success", taskInstanceName);
-                return LogicTaskTakeoverResponse.success(taskInstanceId);
+            if (masterTaskExecutorThreadPool.takeOverMasterTaskExecutor(masterTaskExecutor)) {
+                log.info("Take over LogicTask: {} to MasterTaskExecutorThreadPool success", taskInstanceName);
+                return LogicTaskTakeOverResponse.success(taskInstanceId);
             } else {
-                log.error("Takeover LogicTask: {} to MasterTaskExecutorThreadPool failed", taskInstanceName);
-                return LogicTaskTakeoverResponse.failed(taskInstanceId, "MasterTaskExecutorThreadPool is full");
+                log.error("Take over LogicTask: {} to MasterTaskExecutorThreadPool failed", taskInstanceName);
+                return LogicTaskTakeOverResponse.failed(taskInstanceId, "MasterTaskExecutorThreadPool is full");
             }
         } finally {
             LogUtils.removeWorkflowAndTaskInstanceIdMDC();

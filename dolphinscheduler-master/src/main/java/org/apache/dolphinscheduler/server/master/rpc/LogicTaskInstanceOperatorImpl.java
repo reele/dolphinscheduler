@@ -18,7 +18,6 @@
 package org.apache.dolphinscheduler.server.master.rpc;
 
 import org.apache.dolphinscheduler.extract.master.ILogicTaskInstanceOperator;
-import org.apache.dolphinscheduler.extract.master.transportor.*;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -51,9 +50,9 @@ public class LogicTaskInstanceOperatorImpl implements ILogicTaskInstanceOperator
     }
 
     @Override
-    public LogicTaskTakeoverResponse takeoverLogicTask(LogicTaskTakeoverRequest taskTakeoverRequest) {
-        return logicTaskInstanceOperationFunctionManager.getLogicTaskInstanceTakeoverOperationFunction()
-                .operate(taskTakeoverRequest);
+    public LogicTaskTakeOverResponse takeOverLogicTask(LogicTaskTakeOverRequest taskTakeOverRequest) {
+        return logicTaskInstanceOperationFunctionManager.getLogicTaskInstanceTakeOverOperationFunction()
+                .operate(taskTakeOverRequest);
     }
 
 }
