@@ -15,25 +15,28 @@
  * limitations under the License.
  */
 
-package org.apache.dolphinscheduler.extract.master;
+package org.apache.dolphinscheduler.extract.master.transportor;
 
-import org.apache.dolphinscheduler.extract.base.RpcMethod;
-import org.apache.dolphinscheduler.extract.base.RpcService;
-import org.apache.dolphinscheduler.extract.master.transportor.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@RpcService
-public interface ILogicTaskInstanceOperator {
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class LogicTaskTakeoverResponse {
 
-    @RpcMethod
-    LogicTaskDispatchResponse dispatchLogicTask(LogicTaskDispatchRequest taskDispatchRequest);
+    private Integer taskInstanceId;
 
-    @RpcMethod
-    LogicTaskKillResponse killLogicTask(LogicTaskKillRequest taskKillRequest);
+    private boolean success;
 
-    @RpcMethod
-    LogicTaskPauseResponse pauseLogicTask(LogicTaskPauseRequest taskPauseRequest);
+    private String message;
 
-    @RpcMethod
-    LogicTaskTakeoverResponse takeoverLogicTask(LogicTaskTakeoverRequest taskTakeoverRequest);
+    public static LogicTaskTakeoverResponse success(Integer taskInstanceId) {
+        return new LogicTaskTakeoverResponse(taskInstanceId, true, "takeover success");
+    }
 
+    public static LogicTaskTakeoverResponse failed(Integer taskInstanceId, String message) {
+        return new LogicTaskTakeoverResponse(taskInstanceId, false, message);
+    }
 }

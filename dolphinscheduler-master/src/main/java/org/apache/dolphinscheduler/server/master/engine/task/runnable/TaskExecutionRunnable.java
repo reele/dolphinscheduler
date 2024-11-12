@@ -20,16 +20,18 @@ package org.apache.dolphinscheduler.server.master.engine.task.runnable;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import org.apache.dolphinscheduler.dao.entity.Project;
-import org.apache.dolphinscheduler.dao.entity.TaskDefinition;
-import org.apache.dolphinscheduler.dao.entity.TaskInstance;
-import org.apache.dolphinscheduler.dao.entity.WorkflowDefinition;
-import org.apache.dolphinscheduler.dao.entity.WorkflowInstance;
+import org.apache.dolphinscheduler.dao.entity.*;
+import org.apache.dolphinscheduler.dao.mapper.WorkflowInstanceMapper;
+import org.apache.dolphinscheduler.dao.mapper.WorkflowInstanceRelationMapper;
 import org.apache.dolphinscheduler.extract.base.client.Clients;
+import org.apache.dolphinscheduler.extract.master.ILogicTaskInstanceOperator;
+import org.apache.dolphinscheduler.extract.master.transportor.LogicTaskTakeoverRequest;
+import org.apache.dolphinscheduler.extract.master.transportor.LogicTaskTakeoverResponse;
 import org.apache.dolphinscheduler.extract.worker.ITaskInstanceOperator;
 import org.apache.dolphinscheduler.extract.worker.transportor.TakeOverTaskRequest;
 import org.apache.dolphinscheduler.extract.worker.transportor.TakeOverTaskResponse;
 import org.apache.dolphinscheduler.plugin.task.api.TaskExecutionContext;
+import org.apache.dolphinscheduler.plugin.task.api.task.SubWorkflowLogicTaskChannelFactory;
 import org.apache.dolphinscheduler.plugin.task.api.utils.TaskTypeUtils;
 import org.apache.dolphinscheduler.server.master.config.MasterConfig;
 import org.apache.dolphinscheduler.server.master.engine.WorkflowEventBus;
@@ -157,29 +159,68 @@ public class TaskExecutionRunnable implements ITaskExecutionRunnable {
                 .createTaskExecutionContext(request);
     }
 
+    private WorkflowInstance getValidSubWorkflowInstance() {
+
+        WorkflowInstanceRelation workflowInstanceRelation = applicationContext.getBean(WorkflowInstanceRelationMapper.class)
+                .queryByParentId(taskInstance.getWorkflowInstanceId(), taskInstance.getId());
+        if (workflowInstanceRelation == null || workflowInstanceRelation.getWorkflowInstanceId() == 0) {
+            return null;
+        }
+
+        WorkflowInstance workflowInstance = applicationContext.getBean(WorkflowInstanceMapper.class).queryDetailById(workflowInstanceRelation.getWorkflowInstanceId());
+
+        if (workflowInstance == null || !workflowInstance.getState().canFailover()){
+            return null;
+        }
+
+        return workflowInstance;
+    }
+
     private boolean takeOverTaskFromExecutor() {
         checkState(isTaskInstanceInitialized(), "The task instance is null, can't take over from executor.");
-        if (TaskTypeUtils.isLogicTask(taskInstance.getTaskType())) {
-            return false;
-        }
         if (StringUtils.isEmpty(taskInstance.getHost())) {
             log.debug("Task: {} host is empty, cannot take over the task from executor(This is normal case).",
                     taskInstance.getName());
             return false;
         }
-        try {
-            final TakeOverTaskRequest takeOverTaskRequest = TakeOverTaskRequest.builder()
-                    .taskInstanceId(taskInstance.getId())
-                    .workflowHost(applicationContext.getBean(MasterConfig.class).getMasterAddress())
-                    .build();
-            final TakeOverTaskResponse takeOverTaskResponse = Clients
-                    .withService(ITaskInstanceOperator.class)
-                    .withHost(taskInstance.getHost())
-                    .takeOverTask(takeOverTaskRequest);
-            return takeOverTaskResponse.isSuccess();
-        } catch (Exception ex) {
-            log.warn("Take over task: {} failed", taskInstance.getName(), ex);
-            return false;
+
+        if (TaskTypeUtils.isLogicTask(taskInstance.getTaskType())) {
+            if (!taskInstance.getTaskType().equals(SubWorkflowLogicTaskChannelFactory.NAME)) {
+                return false;
+            }
+            final WorkflowInstance subWorkflowInstance = getValidSubWorkflowInstance();
+            if (subWorkflowInstance == null) {
+                return false;
+            }
+            try {
+                final LogicTaskTakeoverRequest takeOverTaskRequest =
+                        new LogicTaskTakeoverRequest(taskExecutionContext);
+
+                final LogicTaskTakeoverResponse takeOverTaskResponse = Clients
+                        .withService(ILogicTaskInstanceOperator.class)
+                        .withHost(taskInstance.getHost())
+                        .takeoverLogicTask(takeOverTaskRequest);
+                return takeOverTaskResponse.isSuccess();
+            } catch (Exception ex) {
+                log.warn("Take over logic task: {} failed", taskInstance.getName(), ex);
+                return false;
+            }
+        }
+        else {
+            try {
+                final TakeOverTaskRequest takeOverTaskRequest = TakeOverTaskRequest.builder()
+                        .taskInstanceId(taskInstance.getId())
+                        .workflowHost(applicationContext.getBean(MasterConfig.class).getMasterAddress())
+                        .build();
+                final TakeOverTaskResponse takeOverTaskResponse = Clients
+                        .withService(ITaskInstanceOperator.class)
+                        .withHost(taskInstance.getHost())
+                        .takeOverTask(takeOverTaskRequest);
+                return takeOverTaskResponse.isSuccess();
+            } catch (Exception ex) {
+                log.warn("Take over task: {} failed", taskInstance.getName(), ex);
+                return false;
+            }
         }
     }
 

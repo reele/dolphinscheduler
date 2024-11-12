@@ -15,25 +15,21 @@
  * limitations under the License.
  */
 
-package org.apache.dolphinscheduler.extract.master;
+package org.apache.dolphinscheduler.extract.master.transportor;
 
-import org.apache.dolphinscheduler.extract.base.RpcMethod;
-import org.apache.dolphinscheduler.extract.base.RpcService;
-import org.apache.dolphinscheduler.extract.master.transportor.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.apache.dolphinscheduler.plugin.task.api.TaskExecutionContext;
 
-@RpcService
-public interface ILogicTaskInstanceOperator {
+import java.io.Serializable;
 
-    @RpcMethod
-    LogicTaskDispatchResponse dispatchLogicTask(LogicTaskDispatchRequest taskDispatchRequest);
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class LogicTaskTakeoverRequest implements Serializable {
 
-    @RpcMethod
-    LogicTaskKillResponse killLogicTask(LogicTaskKillRequest taskKillRequest);
+    private static final long serialVersionUID = -1L;
 
-    @RpcMethod
-    LogicTaskPauseResponse pauseLogicTask(LogicTaskPauseRequest taskPauseRequest);
-
-    @RpcMethod
-    LogicTaskTakeoverResponse takeoverLogicTask(LogicTaskTakeoverRequest taskTakeoverRequest);
-
+    private TaskExecutionContext taskExecutionContext;
 }

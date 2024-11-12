@@ -51,6 +51,20 @@ public class MasterTaskExecutorThreadPoolManager {
         throw new IllegalArgumentException("Unknown type of MasterTaskExecutor: " + masterTaskExecutor);
     }
 
+
+    public boolean takeoverMasterTaskExecutor(final MasterTaskExecutor masterTaskExecutor) {
+        MasterTaskExecutorHolder.putMasterTaskExecuteRunnable(masterTaskExecutor);
+//        if (masterTaskExecutor instanceof SyncMasterTaskExecutor) {
+//            return masterSyncTaskExecutorThreadPool
+//                    .submitMasterTaskExecutor((SyncMasterTaskExecutor) masterTaskExecutor);
+//        }
+        if (masterTaskExecutor instanceof AsyncMasterTaskExecutor) {
+            return masterAsyncTaskExecutorThreadPool
+                    .submitMasterTaskExecutor((AsyncMasterTaskExecutor) masterTaskExecutor);
+        }
+        throw new IllegalArgumentException("Unknown type of MasterTaskExecutor: " + masterTaskExecutor);
+    }
+
     public boolean removeMasterTaskExecutor(final MasterTaskExecutor masterTaskExecutor) {
         if (masterTaskExecutor instanceof SyncMasterTaskExecutor) {
             return masterSyncTaskExecutorThreadPool
