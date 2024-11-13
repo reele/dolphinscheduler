@@ -17,8 +17,8 @@
 
 package org.apache.dolphinscheduler.server.master.runner.execute;
 
+import org.apache.dolphinscheduler.plugin.task.api.task.SubWorkflowLogicTaskChannelFactory;
 import org.apache.dolphinscheduler.server.master.runner.message.LogicTaskInstanceExecutionEventSenderManager;
-import org.apache.dolphinscheduler.server.master.runner.task.subworkflow.SubWorkflowLogicTask;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -53,7 +53,8 @@ public class MasterTaskExecutorThreadPoolManager {
     }
 
     public boolean takeOverMasterTaskExecutor(final MasterTaskExecutor masterTaskExecutor) {
-        if (!(masterTaskExecutor.getLogicTask() instanceof SubWorkflowLogicTask)) {
+        if (!masterTaskExecutor.getTaskExecutionContext().getTaskType()
+                .equals(SubWorkflowLogicTaskChannelFactory.NAME)) {
             throw new IllegalArgumentException(
                     "Only SubWorkflowLogicTask can be take over: " + masterTaskExecutor.getLogicTask());
         }
