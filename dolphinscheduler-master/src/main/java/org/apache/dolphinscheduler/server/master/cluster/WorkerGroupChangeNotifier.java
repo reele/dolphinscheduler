@@ -68,10 +68,6 @@ public class WorkerGroupChangeNotifier {
     }
 
     public void subscribeWorkerGroupsChange(WorkerGroupListener listener) {
-
-        // add all group when listener added
-        listener.onWorkerGroupAdd(new ArrayList<>(workerGroupMap.values()));
-
         listeners.add(listener);
     }
 
