@@ -30,11 +30,11 @@ import org.apache.dolphinscheduler.extract.master.transportor.workflow.WorkflowI
 import org.apache.dolphinscheduler.extract.master.transportor.workflow.WorkflowInstanceRecoverSuspendTasksResponse;
 import org.apache.dolphinscheduler.extract.master.transportor.workflow.WorkflowInstanceStopRequest;
 import org.apache.dolphinscheduler.extract.master.transportor.workflow.WorkflowInstanceStopResponse;
-import org.apache.dolphinscheduler.extract.master.transportor.workflow.WorkflowManualTriggerRequest;
 import org.apache.dolphinscheduler.server.master.engine.workflow.trigger.WorkflowInstanceRecoverFailureTaskTrigger;
 import org.apache.dolphinscheduler.server.master.engine.workflow.trigger.WorkflowInstanceRecoverSuspendTaskTrigger;
 import org.apache.dolphinscheduler.server.master.exception.MasterTaskExecuteException;
-import org.apache.dolphinscheduler.server.master.runner.task.subworkflow.trigger.SubWorkflowManualTrigger;
+import org.apache.dolphinscheduler.server.master.runner.task.subworkflow.trigger.SubWorkflowTrigger;
+import org.apache.dolphinscheduler.server.master.runner.task.subworkflow.trigger.SubWorkflowTriggerRequest;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -49,7 +49,7 @@ public class SubWorkflowControlClient {
     private WorkflowInstanceDao workflowInstanceDao;
 
     @Autowired
-    private SubWorkflowManualTrigger subWorkflowManualTrigger;
+    private SubWorkflowTrigger subWorkflowTrigger;
 
     @Autowired
     private WorkflowInstanceRecoverFailureTaskTrigger workflowInstanceRecoverFailureTaskTrigger;
@@ -57,8 +57,8 @@ public class SubWorkflowControlClient {
     @Autowired
     private WorkflowInstanceRecoverSuspendTaskTrigger workflowInstanceRecoverSuspendTaskTrigger;
 
-    public Integer triggerSubWorkflow(final WorkflowManualTriggerRequest workflowManualTriggerRequest) {
-        return subWorkflowManualTrigger.triggerWorkflow(workflowManualTriggerRequest).getWorkflowInstanceId();
+    public Integer triggerSubWorkflow(final SubWorkflowTriggerRequest subWorkflowTriggerRequest) {
+        return subWorkflowTrigger.triggerWorkflow(subWorkflowTriggerRequest).getWorkflowInstanceId();
     }
 
     public WorkflowInstanceRecoverFailureTasksResponse triggerFromFailureTasks(

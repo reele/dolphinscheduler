@@ -25,6 +25,7 @@ import org.apache.dolphinscheduler.server.master.utils.MasterThreadFactory;
 
 import org.apache.commons.collections4.CollectionUtils;
 
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -68,7 +69,7 @@ public class WorkerGroupChangeNotifier {
     }
 
     public void subscribeWorkerGroupsChange(WorkerGroupListener listener) {
-
+      
         // add all group when listener added
         listener.onWorkerGroupAdd(new ArrayList<>(workerGroupMap.values()));
 
