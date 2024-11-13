@@ -55,6 +55,9 @@ public class WorkerGroupChangeNotifier {
 
     public WorkerGroupChangeNotifier(WorkerGroupDao workerGroupDao) {
         this.workerGroupDao = workerGroupDao;
+    }
+
+    public void startScheduleThread() {
         detectWorkerGroupChanges();
         final long workerGroupRefreshIntervalSeconds = masterConfig.getWorkerGroupRefreshInterval().getSeconds();
         MasterThreadFactory.getDefaultSchedulerThreadExecutor().scheduleWithFixedDelay(
