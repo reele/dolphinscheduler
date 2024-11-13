@@ -25,6 +25,8 @@ import org.apache.dolphinscheduler.extract.master.transportor.LogicTaskKillReque
 import org.apache.dolphinscheduler.extract.master.transportor.LogicTaskKillResponse;
 import org.apache.dolphinscheduler.extract.master.transportor.LogicTaskPauseRequest;
 import org.apache.dolphinscheduler.extract.master.transportor.LogicTaskPauseResponse;
+import org.apache.dolphinscheduler.extract.master.transportor.LogicTaskTakeOverRequest;
+import org.apache.dolphinscheduler.extract.master.transportor.LogicTaskTakeOverResponse;
 
 @RpcService
 public interface ILogicTaskInstanceOperator {
@@ -37,5 +39,8 @@ public interface ILogicTaskInstanceOperator {
 
     @RpcMethod
     LogicTaskPauseResponse pauseLogicTask(LogicTaskPauseRequest taskPauseRequest);
+
+    @RpcMethod
+    LogicTaskTakeOverResponse takeOverLogicTask(LogicTaskTakeOverRequest taskTakeOverRequest);
 
 }

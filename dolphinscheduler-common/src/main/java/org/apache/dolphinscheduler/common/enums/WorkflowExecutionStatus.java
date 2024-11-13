@@ -102,6 +102,10 @@ public enum WorkflowExecutionStatus {
         return isSuccess() || isFailure() || isStop() || isPause();
     }
 
+    public boolean canFailover() {
+        return !isFinished() && !(this == SERIAL_WAIT || this == WAIT_TO_RUN);
+    }
+
     /**
      * status is success
      *
