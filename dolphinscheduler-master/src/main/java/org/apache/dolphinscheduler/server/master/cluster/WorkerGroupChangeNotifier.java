@@ -25,6 +25,7 @@ import org.apache.dolphinscheduler.server.master.utils.MasterThreadFactory;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +44,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class WorkerGroupChangeNotifier {
 
-    private static final long DEFAULT_REFRESH_WORKER_INTERVAL = Duration.ofMinutes(1).toMillis();
+    private static final long DEFAULT_REFRESH_WORKER_INTERVAL = 10;
 
     private final WorkerGroupDao workerGroupDao;
     private final List<WorkerGroupListener> listeners = new CopyOnWriteArrayList<>();
@@ -61,6 +62,10 @@ public class WorkerGroupChangeNotifier {
     }
 
     public void subscribeWorkerGroupsChange(WorkerGroupListener listener) {
+
+        //add all group when listener added
+        listener.onWorkerGroupAdd(new ArrayList<>(workerGroupMap.values()));
+
         listeners.add(listener);
     }
 
