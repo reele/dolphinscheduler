@@ -93,6 +93,8 @@ public class WorkflowFailoverCommandHandler extends AbstractCommandHandler {
             throw new IllegalArgumentException(
                     "The WorkflowFailoverCommandParam: " + command.getCommandParam() + " is invalid");
         }
+        workflowInstance.setCommandType(command.getCommandType());
+        workflowInstance.addHistoryCmd(command.getCommandType());
         workflowInstance.setState(workflowFailoverCommandParam.getWorkflowExecutionStatus());
         workflowInstanceDao.updateById(workflowInstance);
 

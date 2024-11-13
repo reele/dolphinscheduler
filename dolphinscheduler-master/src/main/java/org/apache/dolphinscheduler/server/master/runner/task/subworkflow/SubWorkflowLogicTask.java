@@ -17,6 +17,7 @@
 
 package org.apache.dolphinscheduler.server.master.runner.task.subworkflow;
 
+import org.apache.dolphinscheduler.common.enums.CommandType;
 import org.apache.dolphinscheduler.common.enums.Flag;
 import org.apache.dolphinscheduler.common.utils.JSONUtils;
 import org.apache.dolphinscheduler.dao.entity.WorkflowDefinition;
@@ -71,14 +72,21 @@ public class SubWorkflowLogicTask extends BaseAsyncLogicTask<SubWorkflowParamete
 
     @Override
     public AsyncTaskExecuteFunction getAsyncTaskExecuteFunction() {
-        subWorkflowLogicTaskRuntimeContext = initializeSubWorkflowInstance();
-        upsertSubWorkflowRelation();
-        taskExecutionContext.setAppIds(JSONUtils.toJsonString(subWorkflowLogicTaskRuntimeContext));
+        // if the sub-workflow instance is already exists and in fail over process,
+        // there should take over the task without create a new sub-workflow instance
+        if (subWorkflowLogicTaskRuntimeContext == null
+                || workflowExecutionRunnable.getWorkflowInstance()
+                        .getCommandType() != CommandType.RECOVER_TOLERANCE_FAULT_PROCESS) {
 
-        applicationContext
-                .getBean(LogicTaskInstanceExecutionEventSenderManager.class)
-                .runningEventSender()
-                .sendMessage(taskExecutionContext);
+            subWorkflowLogicTaskRuntimeContext = initializeSubWorkflowInstance();
+            upsertSubWorkflowRelation();
+            taskExecutionContext.setAppIds(JSONUtils.toJsonString(subWorkflowLogicTaskRuntimeContext));
+
+            applicationContext
+                    .getBean(LogicTaskInstanceExecutionEventSenderManager.class)
+                    .runningEventSender()
+                    .sendMessage(taskExecutionContext);
+        }
 
         return new SubWorkflowAsyncTaskExecuteFunction(
                 subWorkflowLogicTaskRuntimeContext,
