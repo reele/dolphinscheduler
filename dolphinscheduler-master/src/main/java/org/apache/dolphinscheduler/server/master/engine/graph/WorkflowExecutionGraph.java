@@ -253,7 +253,7 @@ public class WorkflowExecutionGraph implements IWorkflowExecutionGraph {
 
     @Override
     public boolean isTaskExecutionRunnableForbidden(final ITaskExecutionRunnable taskExecutionRunnable) {
-        return (!taskExecutionRunnable.getTaskDefinition().getFlag().equals(Flag.YES));
+        return (taskExecutionRunnable.getTaskDefinition().getFlag() == Flag.NO);
     }
 
     /**
