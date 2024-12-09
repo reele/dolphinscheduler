@@ -15,19 +15,11 @@
  * limitations under the License.
  */
 
-package org.apache.dolphinscheduler.server.master.engine.executor.plugin.dynamic;
 
-import java.util.Map;
 
-import lombok.Data;
+public class Fat {
 
-@Data
-public class DynamicOutput {
-
-    private Map<String, String> dynParams;
-
-    private Map<String, String> outputValue;
-
-    private int mappedTimes;
-
+    public static void main(String[] args) {
+        System.out.println("Hello world-----FAT");
+    }
 }

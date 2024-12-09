@@ -15,16 +15,29 @@
  * limitations under the License.
  */
 
-package org.apache.dolphinscheduler.plugin.task.api.task;
+package org.apache.dolphinscheduler.plugin.task.java;
 
-import org.apache.dolphinscheduler.common.utils.JSONUtils;
-import org.apache.dolphinscheduler.plugin.task.api.parameters.AbstractParameters;
-import org.apache.dolphinscheduler.plugin.task.api.parameters.DynamicParameters;
+import java.io.File;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 
-public class DynamicLogicTaskChannel extends AbstractLogicTaskChannel {
+import lombok.extern.slf4j.Slf4j;
 
-    @Override
-    public AbstractParameters parseParameters(String taskParams) {
-        return JSONUtils.parseObject(taskParams, DynamicParameters.class);
+@Slf4j
+public class MainClassExtractor {
+
+    private MainClassExtractor() {
+    }
+    public static String getMainClassName(String jarFilePath) {
+        String mainClassName = null;
+        try (JarFile jarFile = new JarFile(new File(jarFilePath))) {
+
+            Manifest manifest = jarFile.getManifest();
+            mainClassName = manifest.getMainAttributes().getValue("Main-Class");
+
+        } catch (Exception e) {
+            throw new RuntimeException("get mainJarName failed:", e);
+        }
+        return mainClassName;
     }
 }
