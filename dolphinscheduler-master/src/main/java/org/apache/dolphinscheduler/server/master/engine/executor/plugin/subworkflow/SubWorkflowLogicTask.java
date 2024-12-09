@@ -17,6 +17,7 @@
 
 package org.apache.dolphinscheduler.server.master.engine.executor.plugin.subworkflow;
 
+import org.apache.dolphinscheduler.common.enums.CommandType;
 import org.apache.dolphinscheduler.common.enums.Flag;
 import org.apache.dolphinscheduler.common.utils.JSONUtils;
 import org.apache.dolphinscheduler.dao.entity.WorkflowDefinition;
@@ -38,6 +39,7 @@ import org.apache.dolphinscheduler.plugin.task.api.enums.TaskExecutionStatus;
 import org.apache.dolphinscheduler.plugin.task.api.parameters.SubWorkflowParameters;
 import org.apache.dolphinscheduler.server.master.engine.executor.plugin.AbstractLogicTask;
 import org.apache.dolphinscheduler.server.master.engine.executor.plugin.ITaskParameterDeserializer;
+import org.apache.dolphinscheduler.server.master.engine.executor.plugin.subworkflow.trigger.SubWorkflowTriggerRequest;
 import org.apache.dolphinscheduler.server.master.engine.workflow.runnable.IWorkflowExecutionRunnable;
 import org.apache.dolphinscheduler.server.master.exception.MasterTaskExecuteException;
 import org.apache.dolphinscheduler.task.executor.ITaskExecutor;
@@ -78,12 +80,16 @@ public class SubWorkflowLogicTask extends AbstractLogicTask<SubWorkflowParameter
 
     @Override
     public void start() throws MasterTaskExecuteException {
-        subWorkflowLogicTaskRuntimeContext = initializeSubWorkflowInstance();
-        upsertSubWorkflowRelation();
-        taskExecutionContext.setAppIds(JSONUtils.toJsonString(subWorkflowLogicTaskRuntimeContext));
+        final WorkflowInstance workflowInstance = workflowExecutionRunnable.getWorkflowInstance();
+        if (subWorkflowLogicTaskRuntimeContext == null ||
+                workflowInstance.getCommandType() != CommandType.RECOVER_TOLERANCE_FAULT_PROCESS) {
+            subWorkflowLogicTaskRuntimeContext = initializeSubWorkflowInstance();
+            upsertSubWorkflowRelation();
+            taskExecutionContext.setAppIds(JSONUtils.toJsonString(subWorkflowLogicTaskRuntimeContext));
 
-        taskExecutor.getTaskExecutorEventBus()
-                .publish(TaskExecutorRuntimeContextChangedLifecycleEvent.of(taskExecutor));
+            taskExecutor.getTaskExecutorEventBus()
+                    .publish(TaskExecutorRuntimeContextChangedLifecycleEvent.of(taskExecutor));
+        }
 
         subWorkflowTracker = new SubWorkflowTracker(
                 subWorkflowLogicTaskRuntimeContext,
@@ -204,8 +210,9 @@ public class SubWorkflowLogicTask extends AbstractLogicTask<SubWorkflowParameter
         final ICommandParam commandParam =
                 JSONUtils.parseObject(workflowInstance.getCommandParam(), ICommandParam.class);
 
-        final WorkflowManualTriggerRequest workflowManualTriggerRequest = WorkflowManualTriggerRequest.builder()
+        final SubWorkflowTriggerRequest workflowManualTriggerRequest = SubWorkflowTriggerRequest.builder()
                 .userId(taskExecutionContext.getExecutorId())
+                .scheduleTIme(workflowInstance.getScheduleTime())
                 .workflowDefinitionCode(subWorkflowDefinition.getCode())
                 .workflowDefinitionVersion(subWorkflowDefinition.getVersion())
                 .failureStrategy(workflowInstance.getFailureStrategy())

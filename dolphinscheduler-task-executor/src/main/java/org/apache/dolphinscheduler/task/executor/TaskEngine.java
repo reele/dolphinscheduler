@@ -64,6 +64,15 @@ public class TaskEngine implements ITaskEngine {
         }
     }
 
+    public void takeOverTask(final ITaskExecutor taskExecutor) throws TaskExecutorRuntimeException {
+        try (final TaskExecutorMDCUtils.MDCAutoClosable ignore = TaskExecutorMDCUtils.logWithMDC(taskExecutor)) {
+            final ITaskExecutorContainer executorContainer = taskExecutorContainerDelegator.getExecutorContainer();
+            executorContainer.dispatch(taskExecutor);
+            taskExecutorRepository.put(taskExecutor);
+            executorContainer.start(taskExecutor);
+        }
+    }
+
     @Override
     public void pauseTask(final int taskExecutorId) throws TaskExecutorNotFoundException {
         final ITaskExecutor taskExecutor = getTaskExecutor(taskExecutorId);
