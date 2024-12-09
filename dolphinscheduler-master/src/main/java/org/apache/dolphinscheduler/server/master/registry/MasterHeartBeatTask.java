@@ -80,16 +80,16 @@ public class MasterHeartBeatTask extends BaseHeartBeatTask<MasterHeartBeat> {
 
     @Override
     public void writeHeartBeat(final MasterHeartBeat masterHeartBeat) {
-        final String failoverNodePath = RegistryUtils.getFailoverFinishedNodePath(masterHeartBeat);
-        if (registryClient.exists(failoverNodePath)) {
-            log.warn("The master: {} is under {}, means it has been failover will close myself",
-                    masterHeartBeat,
-                    failoverNodePath);
-            registryClient
-                    .getStoppable()
-                    .stop("The master exist: " + failoverNodePath + ", means it has been failover will close myself");
-            return;
-        }
+//        final String failoverNodePath = RegistryUtils.getFailoverFinishedNodePath(masterHeartBeat);
+//        if (registryClient.exists(failoverNodePath)) {
+//            log.warn("The master: {} is under {}, means it has been failover will close myself",
+//                    masterHeartBeat,
+//                    failoverNodePath);
+//            registryClient
+//                    .getStoppable()
+//                    .stop("The master exist: " + failoverNodePath + ", means it has been failover will close myself");
+//            return;
+//        }
         String masterHeartBeatJson = JSONUtils.toJsonString(masterHeartBeat);
         registryClient.persistEphemeral(heartBeatPath, masterHeartBeatJson);
         MasterServerMetrics.incMasterHeartbeatCount();
