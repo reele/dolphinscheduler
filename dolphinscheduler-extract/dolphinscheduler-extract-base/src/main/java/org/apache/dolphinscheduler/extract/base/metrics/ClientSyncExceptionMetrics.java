@@ -34,7 +34,8 @@ public class ClientSyncExceptionMetrics {
 
     private Transporter transporter;
 
-    private String clientHost;
+    @Builder.Default
+    private String clientHost = "";
 
     @Builder.Default
     private String serverHost = NetUtils.getHost();

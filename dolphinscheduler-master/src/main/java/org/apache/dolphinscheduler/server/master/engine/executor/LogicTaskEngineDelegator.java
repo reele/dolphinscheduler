@@ -55,8 +55,7 @@ public class LogicTaskEngineDelegator implements AutoCloseable {
         taskEngine.submitTask(taskExecutor);
     }
 
-
-    public void reassignWorkflowInstanceHost(final TaskExecutionContext taskExecutionContext) {
+    public void takeOverLogicTask(final TaskExecutionContext taskExecutionContext) {
         final ITaskExecutor taskExecutor = logicTaskExecutorFactory.createTaskExecutor(taskExecutionContext);
         taskEngine.takeOverTask(taskExecutor);
     }

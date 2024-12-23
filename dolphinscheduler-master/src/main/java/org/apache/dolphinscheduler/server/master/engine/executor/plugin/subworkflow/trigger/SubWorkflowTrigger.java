@@ -17,7 +17,6 @@
 
 package org.apache.dolphinscheduler.server.master.engine.executor.plugin.subworkflow.trigger;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.dolphinscheduler.common.enums.CommandType;
 import org.apache.dolphinscheduler.common.enums.Flag;
 import org.apache.dolphinscheduler.common.enums.WarningType;
@@ -31,9 +30,12 @@ import org.apache.dolphinscheduler.dao.utils.EnvironmentUtils;
 import org.apache.dolphinscheduler.dao.utils.WorkerGroupUtils;
 import org.apache.dolphinscheduler.extract.master.command.RunWorkflowCommandParam;
 import org.apache.dolphinscheduler.server.master.engine.workflow.trigger.AbstractWorkflowTrigger;
-import org.springframework.stereotype.Component;
+
+import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.Date;
+
+import org.springframework.stereotype.Component;
 
 /**
  * Used to trigger the sub-workflow and generate the workflow instance.
