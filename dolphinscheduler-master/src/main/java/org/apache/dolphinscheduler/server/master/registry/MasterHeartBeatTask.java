@@ -29,6 +29,7 @@ import org.apache.dolphinscheduler.meter.metrics.SystemMetrics;
 import org.apache.dolphinscheduler.registry.api.RegistryClient;
 import org.apache.dolphinscheduler.server.master.config.MasterConfig;
 import org.apache.dolphinscheduler.server.master.config.MasterServerLoadProtection;
+import org.apache.dolphinscheduler.server.master.engine.MasterCoordinator;
 import org.apache.dolphinscheduler.server.master.metrics.MasterServerMetrics;
 
 import lombok.NonNull;
@@ -43,17 +44,21 @@ public class MasterHeartBeatTask extends BaseHeartBeatTask<MasterHeartBeat> {
 
     private final RegistryClient registryClient;
 
+    private final MasterCoordinator masterCoordinator;
+
     private final String heartBeatPath;
 
     private final int processId;
 
     public MasterHeartBeatTask(@NonNull MasterConfig masterConfig,
                                @NonNull MetricsProvider metricsProvider,
-                               @NonNull RegistryClient registryClient) {
+                               @NonNull RegistryClient registryClient,
+                               @NonNull MasterCoordinator masterCoordinator) {
         super("MasterHeartBeatTask", masterConfig.getMaxHeartbeatInterval().toMillis());
         this.masterConfig = masterConfig;
         this.metricsProvider = metricsProvider;
         this.registryClient = registryClient;
+        this.masterCoordinator = masterCoordinator;
         this.heartBeatPath = masterConfig.getMasterRegistryPath();
         this.processId = OSUtils.getProcessID();
     }
@@ -74,6 +79,7 @@ public class MasterHeartBeatTask extends BaseHeartBeatTask<MasterHeartBeat> {
                 .serverStatus(serverStatus)
                 .host(NetUtils.getHost())
                 .port(masterConfig.getListenPort())
+                .isCoordinator(masterCoordinator.isActive())
                 .build();
     }
 
