@@ -130,7 +130,6 @@ public class TaskFailureStateAction extends AbstractTaskStateAction {
                                 final ITaskExecutionRunnable taskExecutionRunnable,
                                 final TaskKillLifecycleEvent taskKillEvent) {
         throwExceptionIfStateIsNotMatch(taskExecutionRunnable);
-        final IWorkflowExecutionGraph workflowExecutionGraph = taskExecutionRunnable.getWorkflowExecutionGraph();
         // for now, killEventAction can be fired on failure with retry
         // there is no task executor now, shouldn't call workflowExecutionGraph.isTaskExecutionRunnableActive()
         // it's better to call super.killedEventAction() direct
