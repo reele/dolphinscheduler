@@ -135,9 +135,10 @@ public class TaskFailureStateAction extends AbstractTaskStateAction {
         // there is no task executor now, shouldn't call workflowExecutionGraph.isTaskExecutionRunnableActive()
         // it's better to call super.killedEventAction() direct
         if (taskExecutionRunnable.isTaskInstanceCanRetry()
-            //        && workflowExecutionGraph.isTaskExecutionRunnableActive(taskExecutionRunnable)
+        // && workflowExecutionGraph.isTaskExecutionRunnableActive(taskExecutionRunnable)
         ) {
-            super.killedEventAction(workflowExecutionRunnable, taskExecutionRunnable, TaskKilledLifecycleEvent.of(taskExecutionRunnable));
+            super.killedEventAction(workflowExecutionRunnable, taskExecutionRunnable,
+                    TaskKilledLifecycleEvent.of(taskExecutionRunnable));
             return;
         }
         logWarningIfCannotDoAction(taskExecutionRunnable, taskKillEvent);
