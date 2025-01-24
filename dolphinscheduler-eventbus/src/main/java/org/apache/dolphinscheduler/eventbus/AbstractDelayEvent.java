@@ -39,6 +39,8 @@ public abstract class AbstractDelayEvent implements IEvent, Delayed {
     @Builder.Default
     protected long createTimeInNano = System.nanoTime();
 
+    protected long expiredTimeInNano;
+
     public AbstractDelayEvent() {
         this(DEFAULT_DELAY_TIME);
     }
@@ -50,6 +52,7 @@ public abstract class AbstractDelayEvent implements IEvent, Delayed {
     public AbstractDelayEvent(final long delayTime, final long createTimeInNano) {
         this.delayTime = delayTime;
         this.createTimeInNano = createTimeInNano;
+        this.expiredTimeInNano = this.delayTime * 1_000_000 + this.createTimeInNano;
     }
 
     @Override
@@ -60,7 +63,7 @@ public abstract class AbstractDelayEvent implements IEvent, Delayed {
 
     @Override
     public int compareTo(Delayed other) {
-        return Long.compare(this.createTimeInNano, ((AbstractDelayEvent) other).createTimeInNano);
+        return Long.compare(this.expiredTimeInNano, ((AbstractDelayEvent) other).expiredTimeInNano);
     }
 
 }

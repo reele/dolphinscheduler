@@ -140,7 +140,7 @@ public class WorkflowExecutionGraph implements IWorkflowExecutionGraph {
 
     @Override
     public boolean isTaskExecutionRunnableActive(final ITaskExecutionRunnable taskExecutionRunnable) {
-        return activeTaskExecutionRunnable.add(taskExecutionRunnable.getName());
+        return activeTaskExecutionRunnable.contains(taskExecutionRunnable.getName());
     }
 
     @Override
