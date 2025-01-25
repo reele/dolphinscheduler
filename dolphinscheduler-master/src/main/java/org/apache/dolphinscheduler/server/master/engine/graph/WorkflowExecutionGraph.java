@@ -256,6 +256,16 @@ public class WorkflowExecutionGraph implements IWorkflowExecutionGraph {
         return (taskExecutionRunnable.getTaskDefinition().getFlag() == Flag.NO);
     }
 
+    @Override
+    public boolean isTaskExecutionRunnableRetrying(final ITaskExecutionRunnable taskExecutionRunnable) {
+        if (!taskExecutionRunnable.isTaskInstanceInitialized()) {
+            return false;
+        }
+        final TaskInstance taskInstance = taskExecutionRunnable.getTaskInstance();
+        return taskInstance.getState() == TaskExecutionStatus.FAILURE && taskExecutionRunnable.isTaskInstanceCanRetry()
+                && isTaskExecutionRunnableActive(taskExecutionRunnable);
+    }
+
     /**
      * Whether all predecessors are skipped.
      * <p> Only when all predecessors are skipped, will return true. If the given task doesn't have any predecessors, will return false.
