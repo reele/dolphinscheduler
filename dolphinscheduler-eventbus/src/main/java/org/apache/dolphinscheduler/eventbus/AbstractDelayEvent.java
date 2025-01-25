@@ -39,7 +39,9 @@ public abstract class AbstractDelayEvent implements IEvent, Delayed {
     @Builder.Default
     protected long createTimeInNano = System.nanoTime();
 
-    protected long expiredTimeInNano;
+    // set create time as default if the inheritor didn't call super()
+    @Builder.Default
+    protected long expiredTimeInNano = System.nanoTime();
 
     public AbstractDelayEvent() {
         this(DEFAULT_DELAY_TIME);
