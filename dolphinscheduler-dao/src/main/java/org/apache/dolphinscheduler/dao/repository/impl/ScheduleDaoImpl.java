@@ -15,17 +15,22 @@
  * limitations under the License.
  */
 
-package org.apache.dolphinscheduler.api.security.impl.pwd;
+package org.apache.dolphinscheduler.dao.repository.impl;
 
-import org.apache.dolphinscheduler.api.security.impl.AbstractAuthenticator;
-import org.apache.dolphinscheduler.dao.entity.User;
+import org.apache.dolphinscheduler.dao.entity.Schedule;
+import org.apache.dolphinscheduler.dao.mapper.ScheduleMapper;
+import org.apache.dolphinscheduler.dao.repository.BaseDao;
+import org.apache.dolphinscheduler.dao.repository.ScheduleDao;
 
 import lombok.NonNull;
 
-public class PasswordAuthenticator extends AbstractAuthenticator {
+import org.springframework.stereotype.Repository;
 
-    @Override
-    public User login(@NonNull String userName, String password) {
-        return userService.queryUser(userName, password);
+@Repository
+public class ScheduleDaoImpl extends BaseDao<Schedule, ScheduleMapper> implements ScheduleDao {
+
+    public ScheduleDaoImpl(@NonNull ScheduleMapper scheduleMapper) {
+        super(scheduleMapper);
     }
+
 }

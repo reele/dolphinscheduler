@@ -105,7 +105,7 @@ public class TaskFailureStateAction extends AbstractTaskStateAction {
                                  final TaskPauseLifecycleEvent taskPauseEvent) {
         throwExceptionIfStateIsNotMatch(taskExecutionRunnable);
         // When the failed task is awaiting retry, we can mark it as 'paused' to ignore the retry event.
-        if (isTaskRetrying(workflowExecutionRunnable, taskExecutionRunnable)) {
+        if (isTaskRetrying(taskExecutionRunnable)) {
             super.pausedEventAction(workflowExecutionRunnable, taskExecutionRunnable,
                     TaskPausedLifecycleEvent.of(taskExecutionRunnable));
             return;
@@ -121,7 +121,7 @@ public class TaskFailureStateAction extends AbstractTaskStateAction {
         // This case happen when the task is failure but the task is in delay retry queue.
         // We don't remove the event in GlobalWorkflowDelayEventCoordinator the event should be dropped when the task is
         // killed.
-        if (isTaskRetrying(workflowExecutionRunnable, taskExecutionRunnable)) {
+        if (isTaskRetrying(taskExecutionRunnable)) {
             super.pausedEventAction(workflowExecutionRunnable, taskExecutionRunnable, taskPausedEvent);
             return;
         }
@@ -134,7 +134,7 @@ public class TaskFailureStateAction extends AbstractTaskStateAction {
                                 final TaskKillLifecycleEvent taskKillEvent) {
         throwExceptionIfStateIsNotMatch(taskExecutionRunnable);
         // When the failed task is awaiting retry, we can mark it as 'killed' to ignore the retry event.
-        if (isTaskRetrying(workflowExecutionRunnable, taskExecutionRunnable)) {
+        if (isTaskRetrying(taskExecutionRunnable)) {
             super.killedEventAction(workflowExecutionRunnable, taskExecutionRunnable,
                     TaskKilledLifecycleEvent.of(taskExecutionRunnable));
             return;
@@ -150,7 +150,7 @@ public class TaskFailureStateAction extends AbstractTaskStateAction {
         // This case happen when the task is failure but the task is in delay retry queue.
         // We don't remove the event in GlobalWorkflowDelayEventCoordinator the event should be dropped when the task is
         // killed.
-        if (isTaskRetrying(workflowExecutionRunnable, taskExecutionRunnable)) {
+        if (isTaskRetrying(taskExecutionRunnable)) {
             super.killedEventAction(workflowExecutionRunnable, taskExecutionRunnable, taskKilledEvent);
             return;
         }
@@ -186,9 +186,7 @@ public class TaskFailureStateAction extends AbstractTaskStateAction {
         return TaskExecutionStatus.FAILURE;
     }
 
-    private boolean isTaskRetrying(
-                                   final IWorkflowExecutionRunnable workflowExecutionRunnable,
-                                   final ITaskExecutionRunnable taskExecutionRunnable) {
+    private boolean isTaskRetrying(final ITaskExecutionRunnable taskExecutionRunnable) {
         final IWorkflowExecutionGraph workflowExecutionGraph = taskExecutionRunnable.getWorkflowExecutionGraph();
         return workflowExecutionGraph.isTaskExecutionRunnableRetrying(taskExecutionRunnable);
     }
