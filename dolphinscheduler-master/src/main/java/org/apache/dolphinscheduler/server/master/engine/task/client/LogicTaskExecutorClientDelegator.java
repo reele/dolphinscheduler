@@ -128,6 +128,7 @@ public class LogicTaskExecutorClientDelegator implements ITaskExecutorClientDele
 
         try {
             logicTaskEngineDelegator.takeOverLogicTask(taskExecutionContext);
+            log.info("Take over logic task: {} succeed!", taskInstance.getName());
         } catch (Exception ex) {
             log.warn("Take over logic task: {} failed", taskInstance.getName(), ex);
             return false;

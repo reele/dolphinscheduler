@@ -116,7 +116,7 @@ public class TaskExecutionRunnable implements ITaskExecutionRunnable {
     public void failover() {
         checkState(isTaskInstanceInitialized(), "The task instance is not initialized, can't failover.");
         if (takeOverTaskFromExecutor()) {
-            log.info("Failover task success, the task {} has been taken-over from executor", taskInstance.getName());
+            log.info("Failover task success, the task {}-{} has been taken-over from executor", taskInstance.getTaskType(), taskInstance.getName());
             return;
         }
         this.taskInstance = applicationContext.getBean(TaskInstanceFactories.class)

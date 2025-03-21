@@ -45,7 +45,8 @@ public class WorkflowReadyStopStateAction extends AbstractWorkflowStateAction {
         throwExceptionIfStateIsNotMatch(workflowExecutionRunnable);
         final IWorkflowExecutionGraph workflowExecutionGraph =
                 workflowExecutionRunnable.getWorkflowExecuteContext().getWorkflowExecutionGraph();
-        triggerTasks(workflowExecutionRunnable, workflowExecutionGraph.getStartNodes());
+//        triggerTasks(workflowExecutionRunnable, workflowExecutionGraph.getStartNodes());
+        super.killActiveTask(workflowExecutionRunnable);
     }
 
     @Override

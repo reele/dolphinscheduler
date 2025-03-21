@@ -30,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
@@ -50,7 +51,7 @@ public class WorkflowExecutionRunnableFactory {
      * <p> We use transaction here to make sure that the command will be handled only once. Since in some case if the
      * master cluster is reblancing, the master slot might different in different master.
      */
-    @Transactional
+    @Transactional(propagation = Propagation.SUPPORTS)
     public IWorkflowExecutionRunnable createWorkflowExecuteRunnable(Command command) {
         deleteCommandOrThrow(command);
         return doCreateWorkflowExecutionRunnable(command);

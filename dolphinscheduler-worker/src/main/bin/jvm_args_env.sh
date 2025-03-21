@@ -15,9 +15,9 @@
 # limitations under the License.
 #
 
--Xms4g
--Xmx4g
--Xmn2g
+-Xms2g
+-Xmx2g
+-Xmn1g
 
 -XX:+IgnoreUnrecognizedVMOptions
 -XX:+PrintGCDateStamps
