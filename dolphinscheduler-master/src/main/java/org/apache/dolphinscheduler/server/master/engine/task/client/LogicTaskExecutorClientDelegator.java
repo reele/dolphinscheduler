@@ -19,15 +19,25 @@ package org.apache.dolphinscheduler.server.master.engine.task.client;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.dolphinscheduler.dao.entity.TaskInstance;
+import org.apache.dolphinscheduler.dao.entity.WorkflowInstance;
+import org.apache.dolphinscheduler.dao.entity.WorkflowInstanceRelation;
+import org.apache.dolphinscheduler.dao.mapper.WorkflowInstanceMapper;
+import org.apache.dolphinscheduler.dao.mapper.WorkflowInstanceRelationMapper;
 import org.apache.dolphinscheduler.extract.base.client.Clients;
 import org.apache.dolphinscheduler.extract.master.ILogicTaskExecutorOperator;
 import org.apache.dolphinscheduler.plugin.task.api.TaskExecutionContext;
+import org.apache.dolphinscheduler.plugin.task.api.task.SubWorkflowLogicTaskChannelFactory;
 import org.apache.dolphinscheduler.server.master.config.MasterConfig;
 import org.apache.dolphinscheduler.server.master.engine.exceptions.TaskKillException;
+import org.apache.dolphinscheduler.server.master.engine.executor.LogicTaskEngineDelegator;
+import org.apache.dolphinscheduler.server.master.engine.executor.LogicTaskExecutorContainerProvider;
 import org.apache.dolphinscheduler.server.master.engine.task.runnable.ITaskExecutionRunnable;
 import org.apache.dolphinscheduler.server.master.exception.dispatch.TaskDispatchException;
+import org.apache.dolphinscheduler.task.executor.container.AbstractTaskExecutorContainer;
 import org.apache.dolphinscheduler.task.executor.eventbus.ITaskExecutorLifecycleEventReporter;
+import org.apache.dolphinscheduler.task.executor.log.TaskExecutorMDCUtils;
 import org.apache.dolphinscheduler.task.executor.operations.TaskExecutorDispatchRequest;
 import org.apache.dolphinscheduler.task.executor.operations.TaskExecutorDispatchResponse;
 import org.apache.dolphinscheduler.task.executor.operations.TaskExecutorKillRequest;
@@ -49,6 +59,18 @@ public class LogicTaskExecutorClientDelegator implements ITaskExecutorClientDele
     @Autowired
     private MasterConfig masterConfig;
 
+    @Autowired
+    private WorkflowInstanceRelationMapper workflowInstanceRelationMapper;
+
+    @Autowired
+    WorkflowInstanceMapper workflowInstanceMapper;
+
+    @Autowired
+    LogicTaskExecutorContainerProvider logicTaskExecutorContainerProvider;
+
+    @Autowired
+    LogicTaskEngineDelegator logicTaskEngineDelegator;
+
     @Override
     public void dispatch(final ITaskExecutionRunnable taskExecutionRunnable) throws TaskDispatchException {
         final String logicTaskExecutorAddress = masterConfig.getMasterAddress();
@@ -67,11 +89,44 @@ public class LogicTaskExecutorClientDelegator implements ITaskExecutorClientDele
                             taskExecutionContext.getHost(), logicTaskDispatchResponse));
         }
     }
+    private WorkflowInstance getValidSubWorkflowInstance(TaskInstance taskInstance) {
+
+        WorkflowInstanceRelation workflowInstanceRelation =
+                workflowInstanceRelationMapper.queryByParentId(taskInstance.getWorkflowInstanceId(), taskInstance.getId());
+        if (workflowInstanceRelation == null || workflowInstanceRelation.getWorkflowInstanceId() == 0) {
+            return null;
+        }
+
+        WorkflowInstance workflowInstance = workflowInstanceMapper
+                .queryDetailById(workflowInstanceRelation.getWorkflowInstanceId());
+
+        if (workflowInstance == null || !workflowInstance.getState().canFailover()) {
+            return null;
+        }
+
+        return workflowInstance;
+    }
 
     @Override
     public boolean reassignMasterHost(final ITaskExecutionRunnable taskExecutionRunnable) {
         // The Logic Task doesn't support take-over, since the logic task is not executed on the worker.
-        return false;
+        TaskInstance taskInstance = taskExecutionRunnable.getTaskInstance();
+        TaskExecutionContext taskExecutionContext = taskExecutionRunnable.getTaskExecutionContext();
+
+        if (!taskInstance.getTaskType().equals(SubWorkflowLogicTaskChannelFactory.NAME)) {
+            return false;
+        }
+        final WorkflowInstance subWorkflowInstance = getValidSubWorkflowInstance(taskInstance);
+        if (subWorkflowInstance == null) {
+            return false;
+        }
+        try {
+            logicTaskEngineDelegator.reassignWorkflowInstanceHost(taskExecutionContext);
+        } catch (Exception ex) {
+            log.warn("Take over logic task: {} failed", taskInstance.getName(), ex);
+            return false;
+        }
+        return true;
     }
 
     @Override

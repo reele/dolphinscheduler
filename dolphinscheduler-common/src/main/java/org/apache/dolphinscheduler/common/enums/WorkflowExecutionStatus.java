@@ -97,6 +97,10 @@ public enum WorkflowExecutionStatus {
         return this == SERIAL_WAIT;
     }
 
+    public boolean canFailover() {
+        return !isFinished() && !(this == SERIAL_WAIT || this == WAIT_TO_RUN);
+    }
+
     public boolean isFinished() {
         return isSuccess() || isFailure() || isStop() || isPause();
     }
