@@ -19,7 +19,6 @@ package org.apache.dolphinscheduler.server.master.engine.task.client;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.dolphinscheduler.dao.entity.TaskInstance;
 import org.apache.dolphinscheduler.dao.entity.WorkflowInstance;
 import org.apache.dolphinscheduler.dao.entity.WorkflowInstanceRelation;
@@ -35,9 +34,7 @@ import org.apache.dolphinscheduler.server.master.engine.executor.LogicTaskEngine
 import org.apache.dolphinscheduler.server.master.engine.executor.LogicTaskExecutorContainerProvider;
 import org.apache.dolphinscheduler.server.master.engine.task.runnable.ITaskExecutionRunnable;
 import org.apache.dolphinscheduler.server.master.exception.dispatch.TaskDispatchException;
-import org.apache.dolphinscheduler.task.executor.container.AbstractTaskExecutorContainer;
 import org.apache.dolphinscheduler.task.executor.eventbus.ITaskExecutorLifecycleEventReporter;
-import org.apache.dolphinscheduler.task.executor.log.TaskExecutorMDCUtils;
 import org.apache.dolphinscheduler.task.executor.operations.TaskExecutorDispatchRequest;
 import org.apache.dolphinscheduler.task.executor.operations.TaskExecutorDispatchResponse;
 import org.apache.dolphinscheduler.task.executor.operations.TaskExecutorKillRequest;
@@ -92,7 +89,8 @@ public class LogicTaskExecutorClientDelegator implements ITaskExecutorClientDele
     private WorkflowInstance getValidSubWorkflowInstance(TaskInstance taskInstance) {
 
         WorkflowInstanceRelation workflowInstanceRelation =
-                workflowInstanceRelationMapper.queryByParentId(taskInstance.getWorkflowInstanceId(), taskInstance.getId());
+                workflowInstanceRelationMapper.queryByParentId(taskInstance.getWorkflowInstanceId(),
+                        taskInstance.getId());
         if (workflowInstanceRelation == null || workflowInstanceRelation.getWorkflowInstanceId() == 0) {
             return null;
         }
@@ -100,7 +98,7 @@ public class LogicTaskExecutorClientDelegator implements ITaskExecutorClientDele
         WorkflowInstance workflowInstance = workflowInstanceMapper
                 .queryDetailById(workflowInstanceRelation.getWorkflowInstanceId());
 
-        if (workflowInstance == null || !workflowInstance.getState().canFailover()) {
+        if (workflowInstance == null || !workflowInstance.getState().canTakeOver()) {
             return null;
         }
 
@@ -109,13 +107,13 @@ public class LogicTaskExecutorClientDelegator implements ITaskExecutorClientDele
 
     @Override
     public boolean reassignMasterHost(final ITaskExecutionRunnable taskExecutionRunnable) {
-        // The Logic Task doesn't support take-over, since the logic task is not executed on the worker.
+        // Only sub workflow logic task does support take-over.
         TaskInstance taskInstance = taskExecutionRunnable.getTaskInstance();
-        TaskExecutionContext taskExecutionContext = taskExecutionRunnable.getTaskExecutionContext();
 
         if (!taskInstance.getTaskType().equals(SubWorkflowLogicTaskChannelFactory.NAME)) {
             return false;
         }
+        TaskExecutionContext taskExecutionContext = taskExecutionRunnable.getTaskExecutionContext();
         final WorkflowInstance subWorkflowInstance = getValidSubWorkflowInstance(taskInstance);
         if (subWorkflowInstance == null) {
             return false;

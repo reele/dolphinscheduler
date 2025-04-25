@@ -57,6 +57,10 @@ public class Repository {
         return workflowInstanceDao.queryById(workflowInstanceId);
     }
 
+    public List<WorkflowInstance> queryAllWorkflowInstance() {
+        return workflowInstanceDao.queryAll();
+    }
+
     /**
      * Return the list of task instances for a given workflow definition in ascending order of their IDs.
      */
