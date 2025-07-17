@@ -209,7 +209,7 @@ public class AlertDao {
                 .workflowExecutionStatus(workflowInstance.getState())
                 .runTimes(workflowInstance.getRunTimes())
                 .workflowStartTime(workflowInstance.getStartTime())
-                .workflowHost(workflowInstance.getHost())
+                .workflowHost(workflowInstance.getHostAddress())
                 .event(AlertEvent.TIME_OUT)
                 .warnLevel(AlertWarnLevel.MIDDLE)
                 .build();

@@ -17,6 +17,7 @@
 
 package org.apache.dolphinscheduler.server.master.failover;
 
+import org.apache.dolphinscheduler.common.utils.ServerHostKeyUtils;
 import org.apache.dolphinscheduler.dao.entity.WorkflowInstance;
 import org.apache.dolphinscheduler.dao.repository.WorkflowInstanceDao;
 import org.apache.dolphinscheduler.plugin.task.api.enums.TaskExecutionStatus;
@@ -73,25 +74,23 @@ public class FailoverCoordinator implements IFailoverCoordinator {
         log.info("Global master failover starting");
         final List<String> masterAddressWhichContainsUnFinishedWorkflow =
                 workflowInstanceDao.queryNeedFailoverMasters();
-        for (final String masterAddress : masterAddressWhichContainsUnFinishedWorkflow) {
+        for (final String masterHostKey : masterAddressWhichContainsUnFinishedWorkflow) {
+
+            final String masterAddress = ServerHostKeyUtils.getAddress(masterHostKey);
             final Optional<MasterServerMetadata> aliveMasterOptional =
                     clusterManager.getMasterClusters().getServer(masterAddress);
             if (aliveMasterOptional.isPresent()) {
-                // If the master is alive, then we use the alive master's startup time as the failover deadline.
-                final MasterServerMetadata aliveMasterServerMetadata = aliveMasterOptional.get();
-                log.info("The master[{}] is alive, do global master failover on it", aliveMasterServerMetadata);
-                doMasterFailover(
-                        masterAddress,
-                        aliveMasterServerMetadata.getServerStartupTime(),
-                        RegistryUtils.getFailoveredNodePathWhichStartupTimeIsUnknown(
-                                masterAddress));
+                if (aliveMasterOptional.get().getServerStartupTime() != ServerHostKeyUtils.getStartupTime(masterHostKey))
+                {
+                    // If the master is alive, then we use the alive master's startup time as the failover deadline.
+                    final MasterServerMetadata aliveMasterServerMetadata = aliveMasterOptional.get();
+                    log.info("The master[{}] is alive, do global master failover on it", aliveMasterServerMetadata);
+                    doMasterFailover(masterHostKey);
+                }
             } else {
                 // If the master is not alive, then we use the event time as the failover deadline.
-                log.info("The master[{}] is not alive, do global master failover on it", masterAddress);
-                doMasterFailover(
-                        masterAddress,
-                        globalMasterFailoverEvent.getEventTime().getTime(),
-                        RegistryUtils.getFailoveredNodePathWhichStartupTimeIsUnknown(masterAddress));
+                log.info("The master[{}] is not alive, do global master failover on it", masterHostKey);
+                doMasterFailover(masterAddress);
             }
         }
 
@@ -114,75 +113,48 @@ public class FailoverCoordinator implements IFailoverCoordinator {
                 return;
             }
         }
+
         doMasterFailover(
-                masterServerMetadata.getAddress(),
-                masterFailoverEvent.getEventTime().getTime(),
-                RegistryUtils.getFailoveredNodePath(
-                        masterServerMetadata.getAddress(),
-                        masterServerMetadata.getServerStartupTime(),
-                        masterServerMetadata.getProcessId()));
+                ServerHostKeyUtils.toHostKey(masterAddress, masterServerMetadata.getServerStartupTime()));
     }
 
     /**
      * Do master failover.
      * <p> Will failover the workflow which is scheduled by the master and the workflow's fire time is before the maxWorkflowFireTime.
      */
-    private void doMasterFailover(final String masterAddress,
-                                  final long workflowFailoverDeadline,
-                                  final String masterFailoverNodePath) {
+    private void doMasterFailover(final String masterHostKey) {
         // We use lock to avoid multiple master failover at the same time.
         // Once the workflow has been failovered, then it's state will be changed to FAILOVER
         // Once the FAILOVER workflow has been refired, then it's host will be changed to the new master and have a new
         // start time.
         // So if a master has been failovered multiple times, there is no problem.
         final StopWatch failoverTimeCost = StopWatch.createStarted();
-        registryClient.getLock(RegistryUtils.getMasterFailoverLockPath(masterAddress));
+        final String masterFailoverNodePath = RegistryUtils.getFailoveredNodePathWhichStartupTimeIsUnknown(masterHostKey);
+        registryClient.getLock(RegistryUtils.getMasterFailoverLockPath(masterHostKey));
         try {
             // If the master has already been failovered, then we skip the failover.
-            if (registryClient.exists(masterFailoverNodePath)
-                    && String.valueOf(workflowFailoverDeadline).equals(registryClient.get(masterFailoverNodePath))) {
-                log.error("The master[{}/{}] is exist at: {}, means it has already been failovered, skip failover",
-                        masterAddress,
-                        workflowFailoverDeadline,
+            if (registryClient.exists(masterFailoverNodePath)) {
+                log.error("The master[{}] is exist at: {}, means it has already been failovered, skip failover",
+                        masterHostKey,
                         masterFailoverNodePath);
                 return;
             }
-            final List<WorkflowInstance> needFailoverWorkflows =
-                    getFailoverWorkflowsForMaster(masterAddress, new Date(workflowFailoverDeadline));
+            final List<WorkflowInstance> needFailoverWorkflows = getFailoverWorkflowsForMaster(masterHostKey);
             needFailoverWorkflows.forEach(workflowFailover::failoverWorkflow);
-            registryClient.persist(masterFailoverNodePath, String.valueOf(workflowFailoverDeadline));
+            registryClient.persist(masterFailoverNodePath, masterHostKey);
             failoverTimeCost.stop();
             log.info("Master[{}] failover {} workflows finished, cost: {}/ms",
-                    masterAddress,
+                    masterHostKey,
                     needFailoverWorkflows.size(),
                     failoverTimeCost.getTime());
         } finally {
-            registryClient.releaseLock(RegistryNodeType.MASTER_FAILOVER_LOCK.getRegistryPath());
+            registryClient.releaseLock(RegistryUtils.getMasterFailoverLockPath(masterHostKey));
         }
     }
 
-    private List<WorkflowInstance> getFailoverWorkflowsForMaster(final String masterAddress,
-                                                                 final Date masterCrashTime) {
+    private List<WorkflowInstance> getFailoverWorkflowsForMaster(final String masterHostKey) {
         // todo: use page query
-        final List<WorkflowInstance> workflowInstances =
-                workflowInstanceDao.queryNeedFailoverWorkflowInstances(masterAddress);
-        return workflowInstances.stream()
-                .filter(workflowInstance -> {
-
-                    if (workflowRepository.contains(workflowInstance.getId())) {
-                        return false;
-                    }
-
-                    // todo: If the first time run workflow have the restartTime, then we can only check this
-                    final Date restartTime = workflowInstance.getRestartTime();
-                    if (restartTime != null) {
-                        return restartTime.before(masterCrashTime);
-                    }
-
-                    final Date startTime = workflowInstance.getStartTime();
-                    return startTime.before(masterCrashTime);
-                })
-                .collect(Collectors.toList());
+        return workflowInstanceDao.queryNeedFailoverWorkflowInstances(masterHostKey);
     }
 
     @Override

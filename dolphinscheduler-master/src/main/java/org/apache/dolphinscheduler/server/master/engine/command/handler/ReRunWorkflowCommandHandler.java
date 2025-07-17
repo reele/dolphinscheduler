@@ -75,7 +75,7 @@ public class ReRunWorkflowCommandHandler extends RunWorkflowCommandHandler {
         workflowInstance.setStateWithDesc(WorkflowExecutionStatus.RUNNING_EXECUTION, command.getCommandType().name());
         workflowInstance.setCommandType(command.getCommandType());
         workflowInstance.setRestartTime(new Date());
-        workflowInstance.setHost(masterConfig.getMasterAddress());
+        workflowInstance.setHost(masterConfig.getMasterHostKey());
         workflowInstance.setEndTime(null);
         workflowInstance.setRunTimes(workflowInstance.getRunTimes() + 1);
         workflowInstanceDao.updateById(workflowInstance);

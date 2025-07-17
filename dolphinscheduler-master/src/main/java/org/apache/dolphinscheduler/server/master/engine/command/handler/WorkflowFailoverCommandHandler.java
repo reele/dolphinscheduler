@@ -90,7 +90,7 @@ public class WorkflowFailoverCommandHandler extends AbstractCommandHandler {
                     "The WorkflowFailoverCommandParam: " + command.getCommandParam() + " is invalid");
         }
         workflowInstance.setState(workflowFailoverCommandParam.getWorkflowExecutionStatus());
-        workflowInstance.setHost(masterConfig.getMasterAddress());
+        workflowInstance.setHost(masterConfig.getMasterHostKey());
         workflowInstanceDao.updateById(workflowInstance);
 
         workflowExecuteContextBuilder.setWorkflowInstance(workflowInstance);

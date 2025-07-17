@@ -21,6 +21,7 @@ import org.apache.dolphinscheduler.alert.config.AlertConfig;
 import org.apache.dolphinscheduler.alert.metrics.AlertServerMetrics;
 import org.apache.dolphinscheduler.alert.service.AlertHAServer;
 import org.apache.dolphinscheduler.common.enums.ServerStatus;
+import org.apache.dolphinscheduler.common.lifecycle.ServerLifeCycleManager;
 import org.apache.dolphinscheduler.common.model.AlertServerHeartBeat;
 import org.apache.dolphinscheduler.common.model.BaseHeartBeatTask;
 import org.apache.dolphinscheduler.common.utils.JSONUtils;
@@ -47,14 +48,12 @@ public class AlertHeartbeatTask extends BaseHeartBeatTask<AlertServerHeartBeat> 
 
     private final AlertHAServer alertHAServer;
     private final String heartBeatPath;
-    private final long startupTime;
 
     public AlertHeartbeatTask(AlertConfig alertConfig,
                               MetricsProvider metricsProvider,
                               RegistryClient registryClient,
                               AlertHAServer alertHAServer) {
         super("AlertHeartbeatTask", alertConfig.getMaxHeartbeatInterval().toMillis());
-        this.startupTime = System.currentTimeMillis();
         this.alertConfig = alertConfig;
         this.metricsProvider = metricsProvider;
         this.registryClient = registryClient;
@@ -69,7 +68,7 @@ public class AlertHeartbeatTask extends BaseHeartBeatTask<AlertServerHeartBeat> 
         SystemMetrics systemMetrics = metricsProvider.getSystemMetrics();
         return AlertServerHeartBeat.builder()
                 .processId(processId)
-                .startupTime(startupTime)
+                .startupTime(ServerLifeCycleManager.getServerStartupTime())
                 .reportTime(System.currentTimeMillis())
                 .jvmCpuUsage(systemMetrics.getJvmCpuUsagePercentage())
                 .cpuUsage(systemMetrics.getSystemCpuUsagePercentage())

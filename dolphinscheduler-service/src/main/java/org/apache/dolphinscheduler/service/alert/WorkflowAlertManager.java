@@ -128,7 +128,7 @@ public class WorkflowAlertManager {
                 .runTimes(workflowInstance.getRunTimes())
                 .workflowStartTime(workflowInstance.getStartTime())
                 .workflowEndTime(workflowInstance.getEndTime())
-                .workflowHost(workflowInstance.getHost())
+                .workflowHost(workflowInstance.getHostAddress())
                 .build();
         successTaskList.add(workflowAlertContent);
         res = JSONUtils.toJsonString(successTaskList);

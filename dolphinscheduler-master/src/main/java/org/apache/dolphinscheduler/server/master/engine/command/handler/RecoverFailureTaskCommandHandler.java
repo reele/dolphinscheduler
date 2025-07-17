@@ -94,7 +94,7 @@ public class RecoverFailureTaskCommandHandler extends AbstractCommandHandler {
         workflowInstance.setVarPool(null);
         workflowInstance.setStateWithDesc(WorkflowExecutionStatus.RUNNING_EXECUTION, command.getCommandType().name());
         workflowInstance.setCommandType(command.getCommandType());
-        workflowInstance.setHost(masterConfig.getMasterAddress());
+        workflowInstance.setHost(masterConfig.getMasterHostKey());
         workflowInstanceDao.updateById(workflowInstance);
 
         workflowExecuteContextBuilder.setWorkflowInstance(workflowInstance);

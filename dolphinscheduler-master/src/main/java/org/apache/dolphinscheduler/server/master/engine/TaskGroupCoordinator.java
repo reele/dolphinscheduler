@@ -416,7 +416,7 @@ public class TaskGroupCoordinator implements ITaskGroupCoordinator, AutoCloseabl
                     "The WorkflowInstance: " + workflowInstance.getId() + " state is " + workflowInstance.getState()
                             + ", no need to notify");
         }
-        if (workflowInstance.getHost() == null || Constants.NULL.equals(workflowInstance.getHost())) {
+        if (workflowInstance.getHostAddress() == null || Constants.NULL.equals(workflowInstance.getHostAddress())) {
             throw new UnsupportedOperationException(
                     "WorkflowInstance host is null, maybe it is in failover: " + workflowInstance);
         }
@@ -430,7 +430,7 @@ public class TaskGroupCoordinator implements ITaskGroupCoordinator, AutoCloseabl
         TaskGroupSlotAcquireSuccessNotifyResponse taskGroupSlotAcquireSuccessNotifyResponse =
                 Clients
                         .withService(ITaskInstanceController.class)
-                        .withHost(workflowInstance.getHost())
+                        .withHost(workflowInstance.getHostAddress())
                         .notifyTaskGroupSlotAcquireSuccess(taskGroupSlotAcquireSuccessNotifyRequest);
         if (!taskGroupSlotAcquireSuccessNotifyResponse.isSuccess()) {
             throw new UnsupportedOperationException(

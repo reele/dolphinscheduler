@@ -17,6 +17,8 @@
 
 package org.apache.dolphinscheduler.server.master.config;
 
+import org.apache.dolphinscheduler.common.lifecycle.ServerLifeCycleManager;
+import org.apache.dolphinscheduler.common.utils.ServerHostKeyUtils;
 import org.apache.dolphinscheduler.common.utils.NetUtils;
 import org.apache.dolphinscheduler.registry.api.enums.RegistryNodeType;
 import org.apache.dolphinscheduler.server.master.cluster.loadbalancer.WorkerLoadBalancerConfigurationProperties;
@@ -70,6 +72,11 @@ public class MasterConfig implements Validator {
     private String masterAddress;
 
     /**
+     * The key of master address and startup time
+     */
+    private String masterHostKey;
+
+    /**
      * The registry path for the master server in the format '/nodes/master/ip:listenPort'.
      */
     private String masterRegistryPath;
@@ -99,6 +106,9 @@ public class MasterConfig implements Validator {
         }
         if (StringUtils.isEmpty(masterConfig.getMasterAddress())) {
             masterConfig.setMasterAddress(NetUtils.getAddr(masterConfig.getListenPort()));
+        }
+        if (StringUtils.isEmpty(masterConfig.getMasterHostKey())) {
+            masterConfig.setMasterHostKey(ServerHostKeyUtils.toHostKey(masterConfig.getMasterAddress(), ServerLifeCycleManager.getServerStartupTime()));
         }
         commandFetchStrategy.validate(errors);
         workerLoadBalancerConfigurationProperties.validate(errors);

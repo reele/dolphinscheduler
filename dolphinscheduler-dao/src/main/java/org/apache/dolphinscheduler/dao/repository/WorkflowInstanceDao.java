@@ -96,5 +96,5 @@ public interface WorkflowInstanceDao extends IDao<WorkflowInstance> {
     /**
      * Query the workflow instances under the master that need to be failover.
      */
-    List<WorkflowInstance> queryNeedFailoverWorkflowInstances(String masterAddress);
+    List<WorkflowInstance> queryNeedFailoverWorkflowInstances(String masterHostKey);
 }

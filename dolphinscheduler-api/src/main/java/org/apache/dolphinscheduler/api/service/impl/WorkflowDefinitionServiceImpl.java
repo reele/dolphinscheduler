@@ -1883,7 +1883,7 @@ public class WorkflowDefinitionServiceImpl extends BaseServiceImpl implements Wo
                     .add(new Instance(workflowInstance.getId(), workflowInstance.getName(),
                             workflowInstance.getWorkflowDefinitionCode(),
                             "", workflowInstance.getState().name(), workflowInstance.getStartTime(), endTime,
-                            workflowInstance.getHost(),
+                            workflowInstance.getHostAddress(),
                             DateUtils.format2Readable(endTime.getTime() - workflowInstance.getStartTime().getTime())));
         }
 

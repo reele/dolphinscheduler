@@ -82,7 +82,7 @@ public class PauseWorkflowInstanceExecutorDelegate
         try {
             final WorkflowInstancePauseResponse pauseResponse = Clients
                     .withService(IWorkflowControlClient.class)
-                    .withHost(workflowInstance.getHost())
+                    .withHost(workflowInstance.getHostAddress())
                     .pauseWorkflowInstance(new WorkflowInstancePauseRequest(workflowInstance.getId()));
 
             if (pauseResponse != null && pauseResponse.isSuccess()) {

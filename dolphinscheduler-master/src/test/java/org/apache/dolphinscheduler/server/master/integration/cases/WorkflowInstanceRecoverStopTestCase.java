@@ -150,7 +150,7 @@ public class WorkflowInstanceRecoverStopTestCase extends AbstractMasterIntegrati
 
                                 final WorkflowInstanceStopResponse stopResponse = Clients
                                         .withService(IWorkflowControlClient.class)
-                                        .withHost(workflowInstance.getHost())
+                                        .withHost(workflowInstance.getHostAddress())
                                         .stopWorkflowInstance(
                                                 new WorkflowInstanceStopRequest(workflowInstance.getId()));
 

@@ -25,6 +25,7 @@ import org.apache.dolphinscheduler.common.enums.TaskDependType;
 import org.apache.dolphinscheduler.common.enums.WarningType;
 import org.apache.dolphinscheduler.common.enums.WorkflowExecutionStatus;
 import org.apache.dolphinscheduler.common.utils.DateUtils;
+import org.apache.dolphinscheduler.common.utils.ServerHostKeyUtils;
 import org.apache.dolphinscheduler.common.utils.JSONUtils;
 
 import org.apache.commons.lang3.StringUtils;
@@ -224,6 +225,14 @@ public class WorkflowInstance {
         }
         stateDescList.add(new StateDesc(new Date(), state, stateDesc));
         this.setStateHistory(JSONUtils.toJsonString(stateDescList));
+    }
+
+
+    /**
+     * get host address from host field
+     */
+    public String getHostAddress() {
+        return ServerHostKeyUtils.getAddress(this.host);
     }
 
     @Data

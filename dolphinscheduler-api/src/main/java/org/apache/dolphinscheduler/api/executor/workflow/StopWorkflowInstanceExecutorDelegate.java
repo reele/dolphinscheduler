@@ -83,7 +83,7 @@ public class StopWorkflowInstanceExecutorDelegate
         try {
             final WorkflowInstanceStopResponse stopResponse = Clients
                     .withService(IWorkflowControlClient.class)
-                    .withHost(workflowInstance.getHost())
+                    .withHost(workflowInstance.getHostAddress())
                     .stopWorkflowInstance(new WorkflowInstanceStopRequest(workflowInstance.getId()));
 
             if (stopResponse != null && stopResponse.isSuccess()) {

@@ -81,7 +81,7 @@ public class SubWorkflowControlClient {
         try {
             return Clients
                     .withService(IWorkflowControlClient.class)
-                    .withHost(subWorkflowInstance.getHost())
+                    .withHost(subWorkflowInstance.getHostAddress())
                     .pauseWorkflowInstance(new WorkflowInstancePauseRequest(subWorkflowInstanceId));
         } catch (Exception e) {
             throw new MasterTaskExecuteException("Pause SubWorkflow: " + subWorkflowInstance.getName() + " failed", e);
@@ -98,7 +98,7 @@ public class SubWorkflowControlClient {
         try {
             return Clients
                     .withService(IWorkflowControlClient.class)
-                    .withHost(subWorkflowInstance.getHost())
+                    .withHost(subWorkflowInstance.getHostAddress())
                     .stopWorkflowInstance(new WorkflowInstanceStopRequest(subWorkflowInstance.getId()));
         } catch (Exception e) {
             throw new MasterTaskExecuteException("Kill SubWorkflow: " + subWorkflowInstance.getName() + " failed", e);

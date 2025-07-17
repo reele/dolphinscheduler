@@ -81,7 +81,7 @@ public class RunWorkflowCommandHandler extends AbstractCommandHandler {
         final Command command = workflowExecuteContextBuilder.getCommand();
         final WorkflowInstance workflowInstance = workflowInstanceDao.queryById(command.getWorkflowInstanceId());
         workflowInstance.setStateWithDesc(WorkflowExecutionStatus.RUNNING_EXECUTION, command.getCommandType().name());
-        workflowInstance.setHost(masterConfig.getMasterAddress());
+        workflowInstance.setHost(masterConfig.getMasterHostKey());
         workflowInstance.setCommandParam(command.getCommandParam());
         workflowInstance.setGlobalParams(mergeCommandParamsWithWorkflowParams(command, workflowDefinition));
         workflowInstanceDao.upsertWorkflowInstance(workflowInstance);
