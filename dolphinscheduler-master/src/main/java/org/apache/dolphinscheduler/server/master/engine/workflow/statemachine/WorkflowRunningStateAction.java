@@ -137,7 +137,9 @@ public class WorkflowRunningStateAction extends AbstractWorkflowStateAction {
         }
 
         final WorkflowEventBus workflowEventBus = workflowExecutionRunnable.getWorkflowEventBus();
-        if (workflowExecutionGraph.isExistFailureTaskExecutionRunnableChain()) {
+        if (workflowExecutionGraph.isExistFailureTaskExecutionRunnableChain() ||
+                workflowExecutionGraph.isExistKillTaskExecutionRunnableChain()
+        ) {
             workflowEventBus.publish(WorkflowFailedLifecycleEvent.of(workflowExecutionRunnable));
             return;
         }
