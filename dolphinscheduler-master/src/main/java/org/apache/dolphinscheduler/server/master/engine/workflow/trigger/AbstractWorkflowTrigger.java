@@ -21,10 +21,12 @@ import org.apache.dolphinscheduler.dao.entity.Command;
 import org.apache.dolphinscheduler.dao.entity.User;
 import org.apache.dolphinscheduler.dao.entity.WorkflowDefinition;
 import org.apache.dolphinscheduler.dao.entity.WorkflowDefinitionLog;
+import org.apache.dolphinscheduler.dao.entity.WorkflowExecution;
 import org.apache.dolphinscheduler.dao.entity.WorkflowInstance;
 import org.apache.dolphinscheduler.dao.repository.CommandDao;
 import org.apache.dolphinscheduler.dao.repository.UserDao;
 import org.apache.dolphinscheduler.dao.repository.WorkflowDefinitionLogDao;
+import org.apache.dolphinscheduler.dao.repository.WorkflowExecutionDao;
 import org.apache.dolphinscheduler.dao.repository.WorkflowInstanceDao;
 
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +46,9 @@ public abstract class AbstractWorkflowTrigger<TriggerRequest, TriggerResponse>
     private WorkflowInstanceDao workflowInstanceDao;
 
     @Autowired
+    private WorkflowExecutionDao workflowExecutionDao;
+
+    @Autowired
     private UserDao userDao;
 
     @Autowired
@@ -52,7 +57,11 @@ public abstract class AbstractWorkflowTrigger<TriggerRequest, TriggerResponse>
     @Override
     @Transactional
     public TriggerResponse triggerWorkflow(final TriggerRequest triggerRequest) {
-        final WorkflowInstance workflowInstance = constructWorkflowInstance(triggerRequest);
+
+        final WorkflowExecution workflowExecution = constructWorkflowExecution(triggerRequest);
+        final Integer workflowExecutionId = workflowExecutionDao.insert(workflowExecution);
+
+        final WorkflowInstance workflowInstance = constructWorkflowInstance(triggerRequest, workflowExecutionId);
         workflowInstanceDao.insert(workflowInstance);
 
         final Command command = constructTriggerCommand(triggerRequest, workflowInstance);
@@ -61,7 +70,10 @@ public abstract class AbstractWorkflowTrigger<TriggerRequest, TriggerResponse>
         return onTriggerSuccess(workflowInstance);
     }
 
-    protected abstract WorkflowInstance constructWorkflowInstance(final TriggerRequest triggerRequest);
+    protected abstract WorkflowExecution constructWorkflowExecution(final TriggerRequest triggerRequest);
+
+    protected abstract WorkflowInstance constructWorkflowInstance(final TriggerRequest triggerRequest,
+                                                                  final Integer workflowExecutionId);
 
     protected abstract Command constructTriggerCommand(final TriggerRequest triggerRequest,
                                                        final WorkflowInstance workflowInstance);

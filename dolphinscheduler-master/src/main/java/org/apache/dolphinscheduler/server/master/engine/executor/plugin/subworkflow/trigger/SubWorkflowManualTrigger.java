@@ -18,11 +18,17 @@
 package org.apache.dolphinscheduler.server.master.engine.executor.plugin.subworkflow.trigger;
 
 import org.apache.dolphinscheduler.common.enums.Flag;
+import org.apache.dolphinscheduler.dao.entity.Command;
 import org.apache.dolphinscheduler.dao.entity.WorkflowInstance;
+import org.apache.dolphinscheduler.dao.repository.CommandDao;
+import org.apache.dolphinscheduler.dao.repository.WorkflowInstanceDao;
 import org.apache.dolphinscheduler.extract.master.transportor.workflow.WorkflowManualTriggerRequest;
+import org.apache.dolphinscheduler.extract.master.transportor.workflow.WorkflowManualTriggerResponse;
 import org.apache.dolphinscheduler.server.master.engine.workflow.trigger.WorkflowManualTrigger;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Manual trigger of the workflow, used to trigger the workflow and generate the workflow instance in the manual way.
@@ -30,9 +36,29 @@ import org.springframework.stereotype.Component;
 @Component
 public class SubWorkflowManualTrigger extends WorkflowManualTrigger {
 
+    @Autowired
+    private WorkflowInstanceDao workflowInstanceDao;
+    @Autowired
+    private CommandDao commandDao;
+
+    @Transactional
+    public WorkflowManualTriggerResponse triggerSubWorkflow(final WorkflowManualTriggerRequest triggerRequest,
+                                                            final Integer workflowExecutionId) {
+
+        final WorkflowInstance workflowInstance = constructWorkflowInstance(triggerRequest, workflowExecutionId);
+        workflowInstanceDao.insert(workflowInstance);
+
+        final Command command = constructTriggerCommand(triggerRequest, workflowInstance);
+        commandDao.insert(command);
+
+        return onTriggerSuccess(workflowInstance);
+    }
+
     @Override
-    protected WorkflowInstance constructWorkflowInstance(final WorkflowManualTriggerRequest workflowManualTriggerRequest) {
-        final WorkflowInstance workflowInstance = super.constructWorkflowInstance(workflowManualTriggerRequest);
+    protected WorkflowInstance constructWorkflowInstance(final WorkflowManualTriggerRequest workflowManualTriggerRequest,
+                                                         final Integer workflowExecutionId) {
+        final WorkflowInstance workflowInstance =
+                super.constructWorkflowInstance(workflowManualTriggerRequest, workflowExecutionId);
         workflowInstance.setIsSubWorkflow(Flag.YES);
         return workflowInstance;
     }

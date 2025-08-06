@@ -57,8 +57,10 @@ public class SubWorkflowControlClient {
     @Autowired
     private WorkflowInstanceRecoverSuspendTaskTrigger workflowInstanceRecoverSuspendTaskTrigger;
 
-    public Integer triggerSubWorkflow(final WorkflowManualTriggerRequest workflowManualTriggerRequest) {
-        return subWorkflowManualTrigger.triggerWorkflow(workflowManualTriggerRequest).getWorkflowInstanceId();
+    public Integer triggerSubWorkflow(final WorkflowManualTriggerRequest workflowManualTriggerRequest,
+                                      final Integer workflowExecutionId) {
+        return subWorkflowManualTrigger.triggerSubWorkflow(workflowManualTriggerRequest, workflowExecutionId)
+                .getWorkflowInstanceId();
     }
 
     public WorkflowInstanceRecoverFailureTasksResponse triggerFromFailureTasks(

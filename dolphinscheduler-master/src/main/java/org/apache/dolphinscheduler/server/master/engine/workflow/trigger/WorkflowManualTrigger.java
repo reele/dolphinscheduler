@@ -25,6 +25,7 @@ import org.apache.dolphinscheduler.common.utils.DateUtils;
 import org.apache.dolphinscheduler.common.utils.JSONUtils;
 import org.apache.dolphinscheduler.dao.entity.Command;
 import org.apache.dolphinscheduler.dao.entity.WorkflowDefinition;
+import org.apache.dolphinscheduler.dao.entity.WorkflowExecution;
 import org.apache.dolphinscheduler.dao.entity.WorkflowInstance;
 import org.apache.dolphinscheduler.dao.utils.EnvironmentUtils;
 import org.apache.dolphinscheduler.dao.utils.WorkerGroupUtils;
@@ -47,7 +48,13 @@ public class WorkflowManualTrigger
             AbstractWorkflowTrigger<WorkflowManualTriggerRequest, WorkflowManualTriggerResponse> {
 
     @Override
-    protected WorkflowInstance constructWorkflowInstance(final WorkflowManualTriggerRequest workflowManualTriggerRequest) {
+    protected WorkflowExecution constructWorkflowExecution(WorkflowManualTriggerRequest workflowManualTriggerRequest) {
+        return null;
+    }
+
+    @Override
+    protected WorkflowInstance constructWorkflowInstance(final WorkflowManualTriggerRequest workflowManualTriggerRequest,
+                                                         final Integer workflowExecutionId) {
         final CommandType commandType = CommandType.START_PROCESS;
         final Long workflowCode = workflowManualTriggerRequest.getWorkflowDefinitionCode();
         final Integer workflowVersion = workflowManualTriggerRequest.getWorkflowDefinitionVersion();
@@ -81,6 +88,7 @@ public class WorkflowManualTrigger
                 EnvironmentUtils.getEnvironmentCodeOrDefault(workflowManualTriggerRequest.getEnvironmentCode()));
         workflowInstance.setTimeout(workflowDefinition.getTimeout());
         workflowInstance.setDryRun(workflowManualTriggerRequest.getDryRun().getCode());
+        workflowInstance.setWorkflowExecutionId(workflowExecutionId);
         return workflowInstance;
     }
 

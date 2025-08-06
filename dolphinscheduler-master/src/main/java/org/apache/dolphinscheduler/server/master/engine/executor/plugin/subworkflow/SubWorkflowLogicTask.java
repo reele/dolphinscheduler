@@ -239,7 +239,8 @@ public class SubWorkflowLogicTask extends AbstractLogicTask<SubWorkflowParameter
                 .build();
         final Integer subWorkflowInstanceId = applicationContext
                 .getBean(SubWorkflowControlClient.class)
-                .triggerSubWorkflow(workflowManualTriggerRequest);
+                .triggerSubWorkflow(workflowManualTriggerRequest,
+                        workflowExecutionRunnable.getWorkflowInstance().getWorkflowExecutionId());
         return SubWorkflowLogicTaskRuntimeContext.of(subWorkflowInstanceId);
     }
 

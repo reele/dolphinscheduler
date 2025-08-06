@@ -25,6 +25,7 @@ import org.apache.dolphinscheduler.common.utils.DateUtils;
 import org.apache.dolphinscheduler.common.utils.JSONUtils;
 import org.apache.dolphinscheduler.dao.entity.Command;
 import org.apache.dolphinscheduler.dao.entity.WorkflowDefinition;
+import org.apache.dolphinscheduler.dao.entity.WorkflowExecution;
 import org.apache.dolphinscheduler.dao.entity.WorkflowInstance;
 import org.apache.dolphinscheduler.dao.utils.EnvironmentUtils;
 import org.apache.dolphinscheduler.dao.utils.WorkerGroupUtils;
@@ -48,7 +49,13 @@ public class WorkflowBackfillTrigger
             AbstractWorkflowTrigger<WorkflowBackfillTriggerRequest, WorkflowBackfillTriggerResponse> {
 
     @Override
-    protected WorkflowInstance constructWorkflowInstance(WorkflowBackfillTriggerRequest backfillTriggerRequest) {
+    protected WorkflowExecution constructWorkflowExecution(WorkflowBackfillTriggerRequest workflowBackfillTriggerRequest) {
+        return null;
+    }
+
+    @Override
+    protected WorkflowInstance constructWorkflowInstance(WorkflowBackfillTriggerRequest backfillTriggerRequest,
+                                                         final Integer workflowExecutionId) {
         final CommandType commandType = CommandType.COMPLEMENT_DATA;
         final Long workflowCode = backfillTriggerRequest.getWorkflowCode();
         final Integer workflowVersion = backfillTriggerRequest.getWorkflowVersion();
@@ -84,6 +91,7 @@ public class WorkflowBackfillTrigger
                 EnvironmentUtils.getEnvironmentCodeOrDefault(backfillTriggerRequest.getEnvironmentCode()));
         workflowInstance.setTimeout(workflowDefinition.getTimeout());
         workflowInstance.setDryRun(backfillTriggerRequest.getDryRun().getCode());
+        workflowInstance.setWorkflowExecutionId(workflowExecutionId);
         return workflowInstance;
     }
 
