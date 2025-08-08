@@ -81,7 +81,6 @@ public class SubWorkflowTrigger
                 EnvironmentUtils.getEnvironmentCodeOrDefault(subWorkflowTriggerRequest.getEnvironmentCode()));
         workflowInstance.setTimeout(workflowDefinition.getTimeout());
         workflowInstance.setDryRun(subWorkflowTriggerRequest.getDryRun().getCode());
-        workflowInstance.setTestFlag(subWorkflowTriggerRequest.getTestFlag().getCode());
         return workflowInstance;
     }
 
