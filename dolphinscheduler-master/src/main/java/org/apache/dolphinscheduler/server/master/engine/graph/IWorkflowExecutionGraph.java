@@ -115,7 +115,8 @@ public interface IWorkflowExecutionGraph {
 
     /**
      * Check whether the given task can be trigger now.
-     * <p> The task can be trigger if all the predecessors are finished and all predecessors are not failure/pause/kill.
+     * <p> The task can be trigger only all the predecessors are finished and all predecessors are not failure/pause/kill.
+     * <p> Once the task has been triggered, then will also return false.
      */
     boolean isTriggerConditionMet(final ITaskExecutionRunnable taskExecutionRunnable);
 
@@ -181,12 +182,12 @@ public interface IWorkflowExecutionGraph {
     /**
      * Whether there exist the TaskExecutionRunnable chain in the graph is finish with paused.
      */
-    boolean isExistPauseTaskExecutionRunnableChain();
+    boolean isExistPausedTaskExecutionRunnableChain();
 
     /**
      * Whether there exist the TaskExecutionRunnable chain in the graph is finish with kill.
      */
-    boolean isExistKillTaskExecutionRunnableChain();
+    boolean isExistKilledTaskExecutionRunnableChain();
 
     /**
      * Check whether the given task is the end of the task chain.
