@@ -21,6 +21,7 @@ import org.apache.dolphinscheduler.common.enums.CommandType;
 import org.apache.dolphinscheduler.common.enums.Flag;
 import org.apache.dolphinscheduler.common.enums.WarningType;
 import org.apache.dolphinscheduler.common.enums.WorkflowExecutionStatus;
+import org.apache.dolphinscheduler.common.enums.WorkflowTriggerType;
 import org.apache.dolphinscheduler.common.utils.DateUtils;
 import org.apache.dolphinscheduler.common.utils.JSONUtils;
 import org.apache.dolphinscheduler.dao.entity.Command;
@@ -49,7 +50,11 @@ public class WorkflowManualTrigger
 
     @Override
     protected WorkflowExecution constructWorkflowExecution(WorkflowManualTriggerRequest workflowManualTriggerRequest) {
-        return null;
+        final WorkflowExecution workflowExecution = new WorkflowExecution();
+        workflowExecution.setWorkflowDefinitionCode(workflowManualTriggerRequest.getWorkflowDefinitionCode());
+        workflowExecution.setTriggerType(WorkflowTriggerType.MANUAL);
+        workflowExecution.setTriggerTime(new Date());
+        return workflowExecution;
     }
 
     @Override

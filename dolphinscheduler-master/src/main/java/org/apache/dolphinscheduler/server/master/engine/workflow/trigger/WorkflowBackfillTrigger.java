@@ -21,6 +21,7 @@ import org.apache.dolphinscheduler.common.enums.CommandType;
 import org.apache.dolphinscheduler.common.enums.Flag;
 import org.apache.dolphinscheduler.common.enums.WarningType;
 import org.apache.dolphinscheduler.common.enums.WorkflowExecutionStatus;
+import org.apache.dolphinscheduler.common.enums.WorkflowTriggerType;
 import org.apache.dolphinscheduler.common.utils.DateUtils;
 import org.apache.dolphinscheduler.common.utils.JSONUtils;
 import org.apache.dolphinscheduler.dao.entity.Command;
@@ -50,7 +51,11 @@ public class WorkflowBackfillTrigger
 
     @Override
     protected WorkflowExecution constructWorkflowExecution(WorkflowBackfillTriggerRequest workflowBackfillTriggerRequest) {
-        return null;
+        final WorkflowExecution workflowExecution = new WorkflowExecution();
+        workflowExecution.setWorkflowDefinitionCode(workflowBackfillTriggerRequest.getWorkflowCode());
+        workflowExecution.setTriggerType(WorkflowTriggerType.BACKFILL);
+        workflowExecution.setTriggerTime(DateUtils.stringToDate(workflowBackfillTriggerRequest.getBackfillTimeList().get(0)));
+        return workflowExecution;
     }
 
     @Override
